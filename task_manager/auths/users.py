@@ -3,11 +3,15 @@ from flask import Blueprint, render_template
 users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager.models import Users
+from task_manager.auths.forms import CreateUser
 
 
 @users_bp.route('/register', methods=('POST', 'GET'))
 def register():
-    return 'register'
+    context = dict()
+    context['form'] = CreateUser()
+    context['Title'] = 'Registration'
+    return render_template('users/user_register.html', **context)
 
 
 @users_bp.route('/signin', methods=('POST', 'GET'))

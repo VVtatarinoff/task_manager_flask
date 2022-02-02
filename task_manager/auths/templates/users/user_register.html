@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="post">
+    {{ form.hidden_tag() }}
+     {% for field in form if field.name not in ['csrf_token', 'submit'] %}
+        <div class="form-group">
+        {{ field.label(class="form-label") }}
+            {{ field(class='form-control') }}
+        </div>
+    {% endfor %}
+    <div class="form-group">
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock content %}
