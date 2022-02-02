@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Task manager</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-highlight">
+<header class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar bg-primary font-weight-bold">
+    <div class="navbar-nav-scroll">
+        <ul class="navbar-nav bd-navbar-nav flex-row">
+            <li class="nav-item pl-5">
+                <a class="nav-link " href="#"></a>
+            </li>
+
+        </ul>
+    </div>
+    <ul class="navbar-nav flex-row ml-md-auto">
+        <li>
+            <a></a>
+        </li>
+    </ul>
+        <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.sign_in') }}>Sign in</a>
+        <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.register') }}>Register</a>
+
+</header>
+<div class="container-fluid pt-4 flex-grow-1">
+<div class="row justify-content-md-center align-items-center">
+    <div class="col-md-4">
+        {% block title %}
+         <h1 class="my-4"></h1>
+        {% endblock title %}
+    </div>
+</div>
+<div class="row pt-5">
+    <div class="col-md-2 bd-sidebar">
+
+    </div>
+    <div class="col-md-6">
+        {% block content %}
+        <p>{{ session }}</p>
+        {% block filter %}
+        {% endblock filter %}
+        {% endblock content %}
+    </div>
+</div>
+
+</div>
+<footer>
+{% block footer %}
+    <div class="container my-5 pt-4 border-top">
+        <a class="text-warnings" href="https://ru.hexlet.io" target="_blank">
+        Hexlet
+        </a>
+    </div>
+{% endblock footer %}
+</footer>
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</html>
