@@ -12,7 +12,7 @@
     <div class="navbar-nav-scroll">
         <ul class="navbar-nav bd-navbar-nav flex-row">
             <li class="nav-item pl-5">
-                <a class="nav-link " href="#"></a>
+                <a class="nav-link " href="{{ url_for('users.get_user_list')}}">Users</a>
             </li>
 
         </ul>
@@ -30,7 +30,7 @@
 <div class="row justify-content-md-center align-items-center">
     <div class="col-md-4">
         {% block title %}
-         <h1 class="my-4"></h1>
+         <h1 class="my-4">{{ title }}</h1>
         {% endblock title %}
     </div>
 </div>
@@ -40,7 +40,6 @@
     </div>
     <div class="col-md-6">
         {% block content %}
-        <p>{{ session }}</p>
         {% block filter %}
         {% endblock filter %}
         {% endblock content %}
