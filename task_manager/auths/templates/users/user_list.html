@@ -10,9 +10,12 @@
     <tbody>
     {% for u in table_data %}
         <tr class="">
-            {% for c in u %}
-            <td>{{ c }}</td>
-            {% endfor %}
+
+            <td>{{ u.id }}</td>
+            <td>{{ u.name }}</td>
+            <td>{{ u.first_name }}{{ u.last_name }}</td>
+            <td>{{ u.creation_date.strftime('%d/%m/%Y') }}</td>
+
             <th scope="row">
                 <a href='#'>Change</a>
                 <br>

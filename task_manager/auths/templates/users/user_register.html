@@ -5,8 +5,19 @@
      {% for field in form if field.name not in ['csrf_token', 'submit'] %}
         <div class="form-group">
         {{ field.label(class="form-label") }}
-            {{ field(class='form-control') }}
+            {% if field.errors %}
+
+            {{ field(class='form-control invalid') }}
+            <span class="'invalid-feedback">
+                {% for e in field.errors %}
+                {{ e }}
+                {% endfor %}
+            </span>
+            {% else %}
+            {{ field(class='form-control invalid') }}
+            {% endif %}
         </div>
+
     {% endfor %}
     <div class="form-group">
         {{ form.submit() }}
