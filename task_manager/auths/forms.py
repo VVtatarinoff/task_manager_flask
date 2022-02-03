@@ -34,6 +34,7 @@ class SignInForm(FlaskForm):
                         validators=[Email(),
                                     Length(max=100),
                                     DataRequired()])
-    psw1 = PasswordField('Enter password: ',
+    psw = PasswordField('Enter password: ',
                          validators=[Length(min=5, max=70),
                                      DataRequired()])
+    submit = SubmitField('Sign in')

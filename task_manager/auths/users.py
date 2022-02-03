@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 
 users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager import db
 from task_manager.models import Users
-from task_manager.auths.forms import CreateUser
-from werkzeug.security import generate_password_hash
+from task_manager.auths.forms import CreateUser, SignInForm
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @users_bp.route('/register', methods=('POST', 'GET'))
@@ -24,16 +24,38 @@ def register():
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-        return redirect(url_for('main.index'))
+            flash('Error during adding to DataBase', 'error')
+        else:
+            flash('User registered', 'success')
+        return redirect(url_for('users.sign_in'))
     context = dict()
     context['form'] = form
     context['title'] = 'Registration'
     return render_template('users/user_register.html', **context)
 
 
-@users_bp.route('/signin', methods=('POST', 'GET'))
+@users_bp.route('/login', methods=('POST', 'GET'))
 def sign_in():
-    return 'signing in'
+    form = SignInForm()
+    context = dict()
+    context['form'] = form
+    context['title'] = 'Authorization'
+    if form.validate_on_submit():
+        try:
+            u = Users.query.filter_by(email=request.form['email']).one()
+        except:
+            flash('No such e-mail in database', 'error')
+            render_template('users/user_login.html', **context)
+        else:
+            if u and check_password_hash(u.password,request.form['psw']):
+                session['logged'] == True
+                flash('User logged in', 'success')
+                print(session['logged'])
+
+
+    context['form'] = form
+    context['title'] = 'Authorization'
+    return render_template('users/user_login.html', **context)
 
 
 @users_bp.route('/users')
