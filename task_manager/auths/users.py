@@ -51,10 +51,6 @@ def sign_in():
                 session['logged'] == True
                 flash('User logged in', 'success')
                 print(session['logged'])
-
-
-    context['form'] = form
-    context['title'] = 'Authorization'
     return render_template('users/user_login.html', **context)
 
 
