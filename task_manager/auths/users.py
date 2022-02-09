@@ -11,6 +11,8 @@ from task_manager.auths.forms import CreateUser, SignInForm
 @users_bp.route('/register', methods=('POST', 'GET'))
 def register():
     form = CreateUser()
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
     if form.validate_on_submit():
         try:
             user = User(email=request.form['email'],
@@ -78,7 +80,12 @@ def get_user_list():
     try:
         users = User.query.all()
     except:
-        print('Db access error')
-
+        flash('Db access error')
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
+
+
+@users_bp.route('/delete/<int:id>')
+@login_required
+def delete_user(id):
+    pass

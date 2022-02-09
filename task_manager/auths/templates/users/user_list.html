@@ -19,7 +19,7 @@
             <th scope="row">
                 <a href='#'>Change</a>
                 <br>
-                <a href='#'>Delete</a>
+                <a href={{ url_for('users.delete_user', id=u.id) }}>Delete</a>
             </th>
         </tr>
     {% endfor %}
