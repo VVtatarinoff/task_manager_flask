@@ -37,4 +37,5 @@ class SignInForm(FlaskForm):
     psw = PasswordField('Enter password: ',
                          validators=[Length(min=5, max=70),
                                      DataRequired()])
+    remember_me = BooleanField('Keep me logged in')
     submit = SubmitField('Sign in')

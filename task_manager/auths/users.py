@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask_login import current_user, login_required, login_user, logout_user
 
 users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager import db
-from task_manager.models import Users
+from task_manager.models import User
 from task_manager.auths.forms import CreateUser, SignInForm
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @users_bp.route('/register', methods=('POST', 'GET'))
@@ -13,13 +13,12 @@ def register():
     form = CreateUser()
     if form.validate_on_submit():
         try:
-            hash = generate_password_hash(request.form['psw1'])
-            u = Users(email=request.form['email'],
-                      name=request.form['name'],
-                      first_name=request.form['first_name'],
-                      last_name=request.form['last_name'],
-                      password=hash
-                      )
+            u = User(email=request.form['email'],
+                     name=request.form['name'],
+                     first_name=request.form['first_name'],
+                     last_name=request.form['last_name'],
+                     )
+            u.password = request.form['psw1']
             db.session.add(u)
             db.session.commit()
         except Exception as e:
@@ -37,21 +36,35 @@ def register():
 @users_bp.route('/login', methods=('POST', 'GET'))
 def sign_in():
     form = SignInForm()
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
     context = dict()
     context['form'] = form
     context['title'] = 'Authorization'
     if form.validate_on_submit():
         try:
-            u = Users.query.filter_by(email=request.form['email']).one()
+            user = User.query.filter_by(email=request.form['email']).one()
         except:
             flash('No such e-mail in database', 'error')
             render_template('users/user_login.html', **context)
         else:
-            if u and check_password_hash(u.password,request.form['psw']):
-                session['logged'] == True
+            if user and user.verify_password(request.form['psw']):
+                login_user(user, form.remember_me.data)
                 flash('User logged in', 'success')
-                print(session['logged'])
+                previous_page = request.args.get('next')
+                if previous_page and previous_page != url_for('users.log_out'):
+                    return redirect(previous_page)
+                return redirect(url_for('main.index'))
+            flash('Invalid username or password.')
     return render_template('users/user_login.html', **context)
+
+
+@users_bp.route('/logout')
+@login_required
+def log_out():
+    logout_user()
+    flash('You have been logged out.')
+    return redirect(url_for('main.index'))
 
 
 @users_bp.route('/users')
@@ -62,7 +75,7 @@ def get_user_list():
                               'Full name', 'Creation date')
     users = []
     try:
-        users = Users.query.all()
+        users = User.query.all()
     except:
         print('Db access error')
 
