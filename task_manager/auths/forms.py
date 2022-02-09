@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import Email, EqualTo, Length, DataRequired
+from wtforms.validators import Email, EqualTo, Length, DataRequired, ValidationError
+
+from task_manager.models import User
 
 
 class CreateUser(FlaskForm):
@@ -17,7 +19,7 @@ class CreateUser(FlaskForm):
                             validators=[Length(max=70)])
     psw1 = PasswordField('Enter password: ',
                          validators=[Length(min=5, max=70),
-                                     DataRequired()])
+                                     DataRequired(),])
     psw2 = PasswordField(
         'Repeat password: ',
         validators=[
@@ -25,8 +27,18 @@ class CreateUser(FlaskForm):
             DataRequired(),
             EqualTo(
                 'psw1',
-                message='Пароли не совпадают')])
+                message='Passwords must match')])
     submit = SubmitField('Register')
+
+    @staticmethod
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError('Email already registered.')
+
+    @staticmethod
+    def validate_name(self, field):
+        if User.query.filter_by(name=field.data).first():
+            raise ValidationError('Username already in use.')
 
 
 class SignInForm(FlaskForm):
