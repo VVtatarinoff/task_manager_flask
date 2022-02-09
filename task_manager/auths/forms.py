@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import Email, EqualTo, Length, DataRequired, ValidationError
+from wtforms.validators import Email, EqualTo, Length, DataRequired, ValidationError, Regexp
 
 from task_manager.models import User
 
@@ -12,16 +12,19 @@ class CreateUser(FlaskForm):
                                     DataRequired()])
     name = StringField('Name: ',
                        validators=[Length(max=20),
-                                   DataRequired()])
+                                   DataRequired(),
+                                   Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
+                                          'Usernames must have only letters, '
+                                          'numbers, dots or underscores')])
     first_name = StringField('First name: ',
                              validators=[Length(max=70)])
     last_name = StringField('Last name: ',
                             validators=[Length(max=70)])
     psw1 = PasswordField('Enter password: ',
                          validators=[Length(min=5, max=70),
-                                     DataRequired(),])
+                                     DataRequired(), ])
     psw2 = PasswordField(
-        'Repeat password: ',
+        'Confirm password: ',
         validators=[
             Length(min=5, max=70),
             DataRequired(),
@@ -47,7 +50,7 @@ class SignInForm(FlaskForm):
                                     Length(max=100),
                                     DataRequired()])
     psw = PasswordField('Enter password: ',
-                         validators=[Length(min=5, max=70),
-                                     DataRequired()])
+                        validators=[Length(min=5, max=70),
+                                    DataRequired()])
     remember_me = BooleanField('Keep me logged in')
     submit = SubmitField('Sign in')

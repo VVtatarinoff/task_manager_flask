@@ -13,13 +13,14 @@ def register():
     form = CreateUser()
     if form.validate_on_submit():
         try:
-            u = User(email=request.form['email'],
-                     name=request.form['name'],
-                     first_name=request.form['first_name'],
-                     last_name=request.form['last_name'],
-                     )
-            u.password = request.form['psw1']
-            db.session.add(u)
+            user = User(email=request.form['email'],
+                        name=request.form['name'],
+                        first_name=request.form['first_name'],
+                        last_name=request.form['last_name'],
+                        password=request.form['psw1']
+                        )
+            # u.password = request.form['psw1']
+            db.session.add(user)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
@@ -50,7 +51,7 @@ def sign_in():
         else:
             if user and user.verify_password(request.form['psw']):
                 login_user(user, form.remember_me.data)
-                flash('User logged in', 'success')
+                flash(f'{user.name} logged in', 'success')
                 previous_page = request.args.get('next')
                 if previous_page and previous_page != url_for('users.log_out'):
                     return redirect(previous_page)
