@@ -1,10 +1,13 @@
-import os.path
 from pathlib import Path
 import sqlite3
+from task_manager.auths.models import Role, Permission
+from task_manager import db
 
 DATABASE = Path(__file__).resolve().parent / 'tm.db'
 print('database: ', DATABASE, type(DATABASE))
 print(type(Path(__file__).resolve().parent))
+
+
 # db = sqlite3.connect(DATABASE)
 # SCRIPT = 'ALTER TABLE users ADD COLUMN password varchar(200)'
 
@@ -14,6 +17,7 @@ def execute_script(script):
         db.cursor().executescript(script)
         db.commit()
         db.close
+
 
 def create_user_db():
     script = 'CREATE TABLE IF NOT EXISTS users ' \
@@ -25,10 +29,11 @@ def create_user_db():
              'creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
              'last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
              'password_hash VARCHAR(200) NOT NULL, ' \
-             'role_id INTEGER, '\
+             'role_id INTEGER, ' \
              'FOREIGN KEY (role_id) REFERENCES roles(id))'
     print(script)
     execute_script(script)
+
 
 def create_roles_db():
     script = """CREATE TABLE IF NOT EXISTS roles 
@@ -40,5 +45,29 @@ def create_roles_db():
     execute_script(script)
 
 
+def insert_roles():
+    roles = {
+        'Executor': (Permission.REVIEW |
+                     Permission.EXECUTE, True),
+        'Manager': (Permission.REVIEW |
+                    Permission.EXECUTE |
+                    Permission.MANAGE, False),
+        'Administrator': (0xff, False)
+    }
+
+    for r in roles:
+        role = Role.query.filter_by(name=r).first()
+        if role is None:
+            role = Role(name=r)
+        role.permissions = roles[r][0]
+        role.default_flag = roles[r][1]
+        try:
+            db.session.add(role)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+
 create_roles_db()
 create_user_db()
+insert_roles()

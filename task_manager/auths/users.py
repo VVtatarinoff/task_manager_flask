@@ -1,11 +1,36 @@
+from functools import wraps
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_required, login_user, logout_user
+from werkzeug.exceptions import abort
 
 users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager import db
-from task_manager.auths.models import User
+from task_manager.auths.models import User, Permission
 from task_manager.auths.forms import CreateUser, SignInForm
+
+
+def permission_required(permission):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.can(permission):
+                abort(403)
+            return f(*args, **kwargs)
+
+        return decorated_function
+
+    return decorator
+
+
+def admin_required(f):
+    return permission_required(Permission.ADMINISTER)(f)
+
+
+@users_bp.context_processor
+def inject_permissions():
+    return dict(Permission=Permission)
 
 
 @users_bp.route('/register', methods=('POST', 'GET'))
@@ -21,7 +46,6 @@ def register():
                         last_name=request.form['last_name'],
                         password=request.form['psw1']
                         )
-            # u.password = request.form['psw1']
             db.session.add(user)
             db.session.commit()
         except Exception as e:
@@ -79,8 +103,8 @@ def get_user_list():
     users = []
     try:
         users = User.query.all()
-    except Exception as e:
-        flash(e)
+    except Exception:
+        flash('Database error')
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
 
