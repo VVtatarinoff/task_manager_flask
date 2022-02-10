@@ -21,6 +21,11 @@
 Member since {{ moment(user.creation_date).format('L') }}.
 Last seen {{ moment(user.last_seen).fromNow() }}.
 </p>
+    {% if (user.name == current_user.name) or (current_user.is_administrator()) %}
+    <a class="btn btn-default" href="{{ url_for('users.edit_profile', username=user.name) }}">
+    Edit Profile
+    </a>
+{% endif %}
 </div>
 
 {% endblock content %}

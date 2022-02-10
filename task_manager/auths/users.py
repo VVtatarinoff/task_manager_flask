@@ -8,7 +8,7 @@ users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager import db
 from task_manager.auths.models import User, Permission
-from task_manager.auths.forms import CreateUser, SignInForm
+from task_manager.auths.forms import CreateUser, SignInForm, EditProfileForm
 
 
 def permission_required(permission):
@@ -18,6 +18,20 @@ def permission_required(permission):
             if not current_user.can(permission):
                 abort(403)
             return f(*args, **kwargs)
+
+        return decorated_function
+
+    return decorator
+
+
+def self_or_admin_required(msg):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(username):
+            if current_user.name != username and not current_user.is_administrator():
+                flash(msg)
+                return redirect(url_for('main.index'))
+            return f(username)
 
         return decorated_function
 
@@ -125,7 +139,40 @@ def show_profile(username):
     context['user'] = user
     return render_template('users/user_profile.html', **context)
 
+
 @users_bp.route('/delete/<int:id>')
 @login_required
 def delete_user(id):
     pass
+
+
+@users_bp.route('/update/<string:username>', methods=['GET', 'POST'])
+@login_required
+@self_or_admin_required("You could not edit other user's profile")
+def edit_profile(username):
+
+    user = User.query.filter_by(name=username).first()
+    if user is None:
+        abort(404)
+    form = EditProfileForm(user)
+    context = dict()
+    context['title'] = f'Edit profile of {user.name}'
+    if form.validate_on_submit():
+        user.first_name = form.first_name.data
+        user.last_name = form.last_name.data
+        user.location = form.location.data
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except:
+            flash(f'{user.name} could not be updated', 'error')
+        else:
+            flash(f'Profile of {user.name} has been updated.')
+        return redirect(url_for('users.show_profile', username=user.name))
+    form.first_name.data = user.first_name
+    form.last_name.data = user.last_name
+    form.location.data = user.location
+    form.email.data = user.email
+    context['form'] = form
+    context['user'] = user
+    return render_template('users/edit_profile.html', **context)

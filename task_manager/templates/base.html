@@ -22,6 +22,7 @@
                 <a class="nav-link " href="#">Statuses</a>
                 <a class="nav-link " href="#">Labels</a>
                 <a class="nav-link " href="#">Tasks</a>
+                <a class="nav-link " href={{ url_for('users.show_profile', username=current_user.name) }}>Profile</a>
 
              {% endif %}
         </ul>
@@ -32,8 +33,7 @@
         </li>
     </ul>
     {% if current_user.is_authenticated %}
-        <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.show_profile', username=current_user.name) }}>
-            Profile of {{ current_user.name }}</a>
+        <p class="ml-md-mt-3 font-weight-bold pr-3 pt-2">{{ current_user.name }}</p>
         <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.log_out') }}>Logout</a>
     {% else %}
         <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.login') }}>Login</a>
