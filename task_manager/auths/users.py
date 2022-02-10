@@ -1,5 +1,5 @@
 from functools import wraps
-
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.exceptions import abort
@@ -74,15 +74,20 @@ def sign_in():
         except:
             flash('No such e-mail in database', 'error')
             render_template('users/user_login.html', **context)
-        else:
-            if user and user.verify_password(request.form['psw']):
-                login_user(user, form.remember_me.data)
-                flash(f'{user.name} logged in', 'success')
-                previous_page = request.args.get('next')
-                if previous_page and previous_page != url_for('users.log_out'):
-                    return redirect(previous_page)
-                return redirect(url_for('main.index'))
-            flash('Invalid username or password.')
+
+        if user and user.verify_password(request.form['psw']):
+            login_user(user, form.remember_me.data)
+            flash(f'{user.name} logged in', 'success')
+            user.last_seen = datetime.utcnow()
+            try:
+                db.session.commit()
+            except:
+                flash(f'{user.name} could not update bd', 'error')
+            previous_page = request.args.get('next')
+            if previous_page and previous_page != url_for('users.log_out'):
+                return redirect(previous_page)
+            return redirect(url_for('main.index'))
+        flash('Invalid username or password.')
     return render_template('users/user_login.html', **context)
 
 
