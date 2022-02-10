@@ -20,7 +20,9 @@
 
     {% endfor %}
     <div class="form-group">
-        {{ form.submit() }}
+        {{ form.submit(class = "btn btn-outline-primary") }}
+        <a type="button" class="btn btn-outline-danger" href={{ url_for('users.show_profile', username=user.name) }}>Delete user</a>
+        <a type="button" class="btn btn-outline-primary" href={{ url_for('users.show_profile', username=user.name) }}>Cancel</a>
     </div>
 </form>
 
