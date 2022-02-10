@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_required, login_user, logout_user
 
 users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager import db
-from task_manager.models import User
+from task_manager.auths.models import User
 from task_manager.auths.forms import CreateUser, SignInForm
 
 
@@ -79,8 +79,8 @@ def get_user_list():
     users = []
     try:
         users = User.query.all()
-    except:
-        flash('Db access error')
+    except Exception as e:
+        flash(e)
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
 

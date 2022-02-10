@@ -22,9 +22,23 @@ def create_user_db():
              'email VARCHAR(100) NOT NULL UNIQUE, ' \
              'first_name VARCHAR(70), ' \
              'last_name VARCHAR(70), ' \
-             'creation_date DATETIME NOT NULL DEFAULT   CURRENT_TIMESTAMP, ' \
-             'password_hash VARCHAR(200) NOT NULL)'
+             'creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
+             'last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
+             'password_hash VARCHAR(200) NOT NULL, ' \
+             'role_id INTEGER, '\
+             'FOREIGN KEY (role_id) REFERENCES roles(id))'
     print(script)
     execute_script(script)
 
+def create_roles_db():
+    script = """CREATE TABLE IF NOT EXISTS roles 
+    (id INTEGER PRIMARY KEY, 
+    name VARCHAR(64) NOT NULL UNIQUE, 
+    default_flag BOOLEAN DEFAULT FALSE, 
+    permissions INTEGER)"""
+    print(script)
+    execute_script(script)
+
+
+create_roles_db()
 create_user_db()

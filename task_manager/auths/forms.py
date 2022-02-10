@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import Email, EqualTo, Length, DataRequired, ValidationError, Regexp
 
-from task_manager.models import User
+from task_manager.auths.models import User
 
 
 class CreateUser(FlaskForm):
