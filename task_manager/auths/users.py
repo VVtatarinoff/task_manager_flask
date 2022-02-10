@@ -8,7 +8,7 @@ users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager import db
 from task_manager.auths.models import User, Permission
-from task_manager.auths.forms import CreateUser, SignInForm, EditProfileForm
+from task_manager.auths.forms import CreateUser, SignInForm, EditProfileForm, EditProfileFormAdmin
 
 
 def permission_required(permission):
@@ -150,17 +150,19 @@ def delete_user(id):
 @login_required
 @self_or_admin_required("You could not edit other user's profile")
 def edit_profile(username):
-
     user = User.query.filter_by(name=username).first()
     if user is None:
         abort(404)
-    form = EditProfileForm(user)
+    form = EditProfileFormAdmin(user) if current_user.is_administrator() else EditProfileForm(user)
     context = dict()
     context['title'] = f'Edit profile of {user.name}'
     if form.validate_on_submit():
         user.first_name = form.first_name.data
         user.last_name = form.last_name.data
         user.location = form.location.data
+        if current_user.is_administrator:
+            user.email = form.email.data
+            user.role_id = form.role.data
         try:
             db.session.add(user)
             db.session.commit()
@@ -169,10 +171,6 @@ def edit_profile(username):
         else:
             flash(f'Profile of {user.name} has been updated.')
         return redirect(url_for('users.show_profile', username=user.name))
-    form.first_name.data = user.first_name
-    form.last_name.data = user.last_name
-    form.location.data = user.location
-    form.email.data = user.email
     context['form'] = form
     context['user'] = user
     return render_template('users/edit_profile.html', **context)
