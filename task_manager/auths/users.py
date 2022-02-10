@@ -114,11 +114,15 @@ def get_user_list():
     return render_template('users/user_list.html', **context)
 
 
-@users_bp.route('/profile/<int:id>')
+@users_bp.route('/profile/<string:username>')
 @login_required
-def show_profile(id):
+def show_profile(username):
+    user = User.query.filter_by(name=username).first()
+    if user is None:
+        abort(404)
     context = dict()
     context['title'] = 'User profile'
+    context['user'] = user
     return render_template('users/user_profile.html', **context)
 
 @users_bp.route('/delete/<int:id>')

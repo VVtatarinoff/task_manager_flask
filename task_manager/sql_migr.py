@@ -26,6 +26,7 @@ def create_user_db():
              'email VARCHAR(100) NOT NULL UNIQUE, ' \
              'first_name VARCHAR(70), ' \
              'last_name VARCHAR(70), ' \
+             'location VARCHAR(70), '\
              'creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
              'last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
              'password_hash VARCHAR(200) NOT NULL, ' \
@@ -71,3 +72,4 @@ def insert_roles():
 create_roles_db()
 create_user_db()
 insert_roles()
+

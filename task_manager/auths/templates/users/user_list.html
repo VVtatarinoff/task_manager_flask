@@ -11,7 +11,7 @@
         <tr class="">
 
             <td>{{ u.id }}</td>
-            <td><a href={{ url_for('users.show_profile', id=u.id) }}> {{ u.name }} </a></td>
+            <td><a href={{ url_for('users.show_profile', username=u.name) }}> {{ u.name }} </a></td>
             <td>{{ u.first_name }} {{ u.last_name }}</td>
             <td>{{ u.creation_date.strftime('%d-%m-%Y') }}</td>
 

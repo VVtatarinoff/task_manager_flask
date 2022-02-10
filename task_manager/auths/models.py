@@ -34,9 +34,10 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     first_name = db.Column(db.String(70))
     last_name = db.Column(db.String(70))
-    creation_date = db.Column(db.DateTime, default=datetime.utcnow())
+    location = db.Column(db.String(70), nullable=True)
+    creation_date = db.Column(db.DateTime, default=datetime.utcnow)
     password_hash = db.Column(db.String(200), nullable=False)
-    last_seen = db.Column(db.DateTime, default=datetime.utcnow())
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     role_id = db.Column(db.Integer, ForeignKey('roles.id'))
 
     def __init__(self, **kwargs):
