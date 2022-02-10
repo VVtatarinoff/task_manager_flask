@@ -53,7 +53,7 @@ def register():
             flash('Error during adding to DataBase', 'error')
         else:
             flash('User registered', 'success')
-        return redirect(url_for('users.sign_in'))
+        return redirect(url_for('users.login'))
     context = dict()
     context['form'] = form
     context['title'] = 'Registration'
@@ -61,7 +61,7 @@ def register():
 
 
 @users_bp.route('/login', methods=('POST', 'GET'))
-def sign_in():
+def login():
     form = SignInForm()
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -113,6 +113,13 @@ def get_user_list():
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
 
+
+@users_bp.route('/profile/<int:id>')
+@login_required
+def show_profile(id):
+    context = dict()
+    context['title'] = 'User profile'
+    return render_template('users/user_profile.html', **context)
 
 @users_bp.route('/delete/<int:id>')
 @login_required
