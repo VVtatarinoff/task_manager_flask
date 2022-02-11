@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_moment import Moment
 
-from config import config
+from task_manager.config import config
 
 
 login_manager = LoginManager()
