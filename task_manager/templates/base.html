@@ -16,7 +16,7 @@
                 <a class="nav-link " href="{{ url_for('main.index')}}">Task manager</a>
             </li>
             <li class="nav-item pl-5">
-                <a class="nav-link " href="{{ url_for('users.get_user_list')}}">Users</a>
+                <a class="nav-link " href="{{ url_for('users.get_user_list')}}?Executor=&Administrator=&Manager=">Users</a>
             </li>
             {% if current_user.is_authenticated %}
                 <a class="nav-link " href="#">Statuses</a>

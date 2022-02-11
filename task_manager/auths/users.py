@@ -2,14 +2,16 @@ from functools import wraps
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_required, login_user, logout_user
+from sqlalchemy.orm import load_only
 from werkzeug.exceptions import abort
 
 users_bp = Blueprint('users', __name__, template_folder='templates')
 
 from task_manager import db
-from task_manager.auths.models import User, Permission
+from task_manager.auths.models import User, Permission, Role
 from task_manager.auths.forms import CreateUser, SignInForm, EditProfileForm, EditProfileFormAdmin
 
+FILTERS = ['Administrator', 'Executor', 'Manager']
 
 def permission_required(permission):
     def decorator(f):
@@ -115,15 +117,22 @@ def log_out():
 
 @users_bp.route('/users')
 def get_user_list():
+    request_filter = dict([(x, x in request.args) for x in FILTERS])
     context = dict()
+    context.update(request_filter)
     context['title'] = 'Users'
     context['table_heads'] = ('ID', 'User name',
                               'Full name', 'Creation date')
+    checked_options=list(filter(lambda item: item[1], request_filter.items()))
+    checked_options = list(map(lambda x: x[0], checked_options))
+    checked_id = Role.query.filter(Role.name.in_(checked_options)).options(load_only('id')).all()
+    checked_id = list(map(lambda x: x.id, checked_id))
     users = []
+
     try:
-        users = User.query.all()
-    except Exception:
-        flash('Database error')
+        users = User.query.filter(User.role_id.in_(checked_id)).all()
+    except Exception as e:
+        flash('Database error ', e)
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
 

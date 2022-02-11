@@ -60,7 +60,7 @@ class SignInForm(FlaskForm):
 
 class EditProfileForm(FlaskForm):
     first_name = StringField('First nam: ',
-                        validators=[Length(max=70)])
+                             validators=[Length(max=70)])
     last_name = StringField('Last name: ',
                             validators=[Length(max=70)])
     location = StringField('Location', validators=[Length(max=70)])
@@ -78,6 +78,7 @@ class EditProfileForm(FlaskForm):
                 User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
 
+
 class EditProfileFormAdmin(EditProfileForm):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64),
                                              Email()])
@@ -87,5 +88,5 @@ class EditProfileFormAdmin(EditProfileForm):
         super().__init__(user, *args, **kwargs)
         self.role.choices = [(role.id, role.name)
                              for role in Role.query.order_by(Role.name).all()]
-        self.role.data = self.role.data  or user.role_id
+        self.role.data = self.role.data or user.role_id
         self.email.data = self.email.data or user.email
