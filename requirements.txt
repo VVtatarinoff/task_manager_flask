@@ -37,3 +37,9 @@ visitor @ file:///home/vladimir/.cache/pypoetry/artifacts/28/de/2a/f1797ab732523
 Werkzeug @ file:///home/vladimir/.cache/pypoetry/artifacts/15/3a/86/89704bd3f51d9796b98faa9cca15516723bdc7c61a85ecd9037cbd224a/Werkzeug-2.0.2-py3-none-any.whl
 WTForms @ file:///home/vladimir/.cache/pypoetry/artifacts/23/34/dc/1307b68910a1448e8b0f6a60544f259997a61b078d352154cdb29077bb/WTForms-3.0.1-py3-none-any.whl
 zipp==3.7.0
+
+Flask~=2.0.2
+SQLAlchemy~=1.4.31
+WTForms~=3.0.1
+Werkzeug~=2.0.3
+python-dotenv~=0.19.2
