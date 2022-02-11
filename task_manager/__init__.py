@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_moment import Moment
+from config import config
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -28,3 +29,14 @@ login_manager.init_app(app)
 app.register_blueprint(users_bp)
 app.register_blueprint(main_bp)
 bootstrap = Bootstrap(app)
+
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
+    bootstrap.init_app(app)
+    moment.init_app(app)
+    db.init_app(app)
+
+    return app
