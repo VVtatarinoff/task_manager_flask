@@ -4,8 +4,6 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_moment import Moment
 
-
-
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -21,9 +19,9 @@ app.config['TASK_MANAGER_ADMIN'] = 'vova@mail.ru'
 db = SQLAlchemy(app)
 # db.init_app(app)
 
-from task_manager.auths.models import AnonymousUser
-from task_manager.auths.users import users_bp
-from task_manager.main import main_bp
+from task_manager.auths.models import AnonymousUser # noqa 402
+from task_manager.auths.users import users_bp   # noqa 402
+from task_manager.main import main_bp   # noqa 402
 
 login_manager.anonymous_user = AnonymousUser
 login_manager.init_app(app)

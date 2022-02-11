@@ -1,8 +1,8 @@
-from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, HiddenField
-from wtforms.validators import Email, EqualTo, Length, DataRequired, ValidationError, Regexp
-from wtforms.widgets import HiddenInput
+from wtforms import (StringField, PasswordField,
+                     SubmitField, BooleanField, SelectField)
+from wtforms.validators import (Email, EqualTo, Length,
+                                DataRequired, ValidationError, Regexp)
 
 from task_manager.auths.models import User, Role
 

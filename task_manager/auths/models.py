@@ -74,8 +74,8 @@ class User(UserMixin, db.Model):
     def can(self, permissions):
         # bitwise AND operation between
         # the requested permissions and the permissions of the assigned role
-        return self.role is not None and \
-               (self.role.permissions & permissions) == permissions
+        return (self.role is not None) and (
+            (self.role.permissions & permissions) == permissions)
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)

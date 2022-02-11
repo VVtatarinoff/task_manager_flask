@@ -1,3 +1,4 @@
+from sqlalchemy.exc import SQLAlchemyError
 from functools import wraps
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
@@ -7,11 +8,13 @@ from werkzeug.exceptions import abort
 
 users_bp = Blueprint('users', __name__, template_folder='templates')
 
-from task_manager import db
-from task_manager.auths.models import User, Permission, Role
-from task_manager.auths.forms import CreateUser, SignInForm, EditProfileForm, EditProfileFormAdmin
+from task_manager import db  # noqa 402
+from task_manager.auths.models import User, Permission, Role  # noqa 402
+from task_manager.auths.forms import (CreateUser, SignInForm,  # noqa 402
+                                      EditProfileForm, EditProfileFormAdmin)  # noqa 402
 
 FILTERS = ['Administrator', 'Executor', 'Manager']
+
 
 def permission_required(permission):
     def decorator(f):
@@ -30,7 +33,8 @@ def self_or_admin_required(msg):
     def decorator(f):
         @wraps(f)
         def decorated_function(username):
-            if current_user.name != username and not current_user.is_administrator():
+            if (current_user.name != username) and (
+                    not current_user.is_administrator()):
                 flash(msg)
                 return redirect(url_for('main.index'))
             return f(username)
@@ -64,7 +68,7 @@ def register():
                         )
             db.session.add(user)
             db.session.commit()
-        except Exception as e:
+        except SQLAlchemyError:
             db.session.rollback()
             flash('Error during adding to DataBase', 'error')
         else:
@@ -77,7 +81,7 @@ def register():
 
 
 @users_bp.route('/login', methods=('POST', 'GET'))
-def login():
+def login():                        # noqa 901
     form = SignInForm()
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -87,7 +91,7 @@ def login():
     if form.validate_on_submit():
         try:
             user = User.query.filter_by(email=request.form['email']).one()
-        except:
+        except SQLAlchemyError:
             flash('No such e-mail in database', 'error')
             render_template('users/user_login.html', **context)
 
@@ -97,7 +101,7 @@ def login():
             user.last_seen = datetime.utcnow()
             try:
                 db.session.commit()
-            except:
+            except SQLAlchemyError:
                 flash(f'{user.name} could not update bd', 'error')
             previous_page = request.args.get('next')
             if previous_page and previous_page != url_for('users.log_out'):
@@ -123,15 +127,16 @@ def get_user_list():
     context['title'] = 'Users'
     context['table_heads'] = ('ID', 'User name',
                               'Full name', 'Creation date')
-    checked_options=list(filter(lambda item: item[1], request_filter.items()))
+    checked_options = list(filter(lambda item: item[1], request_filter.items()))
     checked_options = list(map(lambda x: x[0], checked_options))
-    checked_id = Role.query.filter(Role.name.in_(checked_options)).options(load_only('id')).all()
+    checked_id = Role.query.filter(
+        Role.name.in_(checked_options)).options(load_only('id')).all()
     checked_id = list(map(lambda x: x.id, checked_id))
     users = []
 
     try:
         users = User.query.filter(User.role_id.in_(checked_id)).all()
-    except Exception as e:
+    except SQLAlchemyError as e:
         flash('Database error ', e)
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
@@ -160,22 +165,23 @@ def delete_user(id):
 @self_or_admin_required("You could not edit other user's profile")
 def edit_profile(username):
     user = User.query.filter_by(name=username).first()
+    is_admin = current_user.is_administrator()
     if user is None:
         abort(404)
-    form = EditProfileFormAdmin(user) if current_user.is_administrator() else EditProfileForm(user)
+    form = EditProfileFormAdmin(user) if is_admin else EditProfileForm(user)
     context = dict()
     context['title'] = f'Edit profile of {user.name}'
     if form.validate_on_submit():
         user.first_name = form.first_name.data
         user.last_name = form.last_name.data
         user.location = form.location.data
-        if current_user.is_administrator:
+        if is_admin:
             user.email = form.email.data
             user.role_id = form.role.data
         try:
             db.session.add(user)
             db.session.commit()
-        except:
+        except SQLAlchemyError:
             flash(f'{user.name} could not be updated', 'error')
         else:
             flash(f'Profile of {user.name} has been updated.')

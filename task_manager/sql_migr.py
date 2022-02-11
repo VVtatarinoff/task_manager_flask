@@ -37,22 +37,20 @@ def create_user_db():
 
 
 def create_roles_db():
-    script = """CREATE TABLE IF NOT EXISTS roles 
-    (id INTEGER PRIMARY KEY, 
-    name VARCHAR(64) NOT NULL UNIQUE, 
-    default_flag BOOLEAN DEFAULT FALSE, 
-    permissions INTEGER)"""
+    script = """CREATE TABLE IF NOT EXISTS roles
+     (id INTEGER PRIMARY KEY,
+      name VARCHAR(64) NOT NULL UNIQUE,
+       default_flag BOOLEAN DEFAULT FALSE,
+        permissions INTEGER)"""
     print(script)
     execute_script(script)
 
 
 def insert_roles():
     roles = {
-        'Executor': (Permission.REVIEW |
-                     Permission.EXECUTE, True),
-        'Manager': (Permission.REVIEW |
-                    Permission.EXECUTE |
-                    Permission.MANAGE, False),
+        'Executor': (Permission.REVIEW | Permission.EXECUTE, True),
+        'Manager': (
+            Permission.REVIEW | Permission.EXECUTE | Permission.MANAGE, False),
         'Administrator': (0xff, False)
     }
 
@@ -62,14 +60,11 @@ def insert_roles():
             role = Role(name=r)
         role.permissions = roles[r][0]
         role.default_flag = roles[r][1]
-        try:
-            db.session.add(role)
-            db.session.commit()
-        except:
-            db.session.rollback()
+        with db.session as ds:
+            ds.add(role)
+            ds.commit()
 
 
 create_roles_db()
 create_user_db()
 insert_roles()
-
