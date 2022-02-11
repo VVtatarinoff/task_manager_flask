@@ -20,5 +20,5 @@ def test_post(app):
   #  response = client.get(url_for('users.register'))
  #   assert response.status_code == 200
     with app.test_request_context() as client:
-        response = app.test_client().post(url_for('users.register'))
+        response = app.test_client().post(url_for('users.register'), data=NEW_USER)
     assert response.status_code == 200

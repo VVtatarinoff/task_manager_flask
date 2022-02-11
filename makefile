@@ -11,7 +11,7 @@ coverage:
 build:
 	poetry build
 run:
-	poetry run python task_manager/main.py
+	poetry run python task_manager/manager.py
 
 log:
 	heroku logs --tail
