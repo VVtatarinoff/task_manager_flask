@@ -29,6 +29,7 @@ def _db(app):
     db = SQLAlchemy(app)
     return db
 
+"""
 @pytest.fixture
 def client(app):
     #db_fd, db_path = tempfile.mkstemp()
@@ -38,3 +39,4 @@ def client(app):
         with app.test_client() as client:
             db = SQLAlchemy(app)
             yield client
+"""

@@ -16,9 +16,8 @@ NEW_USER = {'name': 'test',
 #    g=1
 
 
-def test_post(app):
+def test_post(app, client):
   #  response = client.get(url_for('users.register'))
  #   assert response.status_code == 200
-    with app.test_request_context() as client:
-        response = app.test_client().post(url_for('users.register'), data=NEW_USER)
+    response = client.post(url_for('users.register'), data=NEW_USER)
     assert response.status_code == 200
