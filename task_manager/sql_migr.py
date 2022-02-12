@@ -1,70 +1,71 @@
 from pathlib import Path
 import sqlite3
 from task_manager.auths.models import Role, Permission
-from task_manager import db
-
-DATABASE = Path(__file__).resolve().parent / 'tm.db'
-print('database: ', DATABASE, type(DATABASE))
-print(type(Path(__file__).resolve().parent))
 
 
-# db = sqlite3.connect(DATABASE)
-# SCRIPT = 'ALTER TABLE users ADD COLUMN password varchar(200)'
-
-
-def execute_script(script):
-    with sqlite3.connect(DATABASE) as db:
-        db.cursor().executescript(script)
+def execute_script(script, database):
+    with sqlite3.connect(database) as db:
+        cursor = db.cursor()
+        cursor.execute(script)
+        records = cursor.fetchall()
         db.commit()
         db.close
+    return records
 
 
-def create_user_db():
+def create_user_db(db):
     script = 'CREATE TABLE IF NOT EXISTS users ' \
              '(id INTEGER PRIMARY KEY, ' \
              'name VARCHAR(20) NOT NULL UNIQUE, ' \
              'email VARCHAR(100) NOT NULL UNIQUE, ' \
              'first_name VARCHAR(70), ' \
              'last_name VARCHAR(70), ' \
-             'location VARCHAR(70), '\
+             'location VARCHAR(70), ' \
              'creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
              'last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ' \
              'password_hash VARCHAR(200) NOT NULL, ' \
              'role_id INTEGER, ' \
              'FOREIGN KEY (role_id) REFERENCES roles(id))'
-    print(script)
-    execute_script(script)
+    execute_script(script, db)
 
 
-def create_roles_db():
+def create_roles_db(db):
     script = """CREATE TABLE IF NOT EXISTS roles
      (id INTEGER PRIMARY KEY,
       name VARCHAR(64) NOT NULL UNIQUE,
        default_flag BOOLEAN DEFAULT FALSE,
         permissions INTEGER)"""
-    print(script)
-    execute_script(script)
+    execute_script(script, db)
 
 
-def insert_roles():
+def insert_roles(db):
     roles = {
         'Executor': (Permission.REVIEW | Permission.EXECUTE, True),
         'Manager': (
             Permission.REVIEW | Permission.EXECUTE | Permission.MANAGE, False),
         'Administrator': (0xff, False)
     }
+    script = "SELECT * FROM roles"
+    selection = execute_script(script, db)
+    if len(selection) == len(roles):
+        return
+    script = "DELETE FROM roles"
+    execute_script(script, db)
 
     for r in roles:
-        role = Role.query.filter_by(name=r).first()
-        if role is None:
-            role = Role(name=r)
-        role.permissions = roles[r][0]
-        role.default_flag = roles[r][1]
-        with db.session as ds:
-            ds.add(role)
-            ds.commit()
+        permissions = roles[r][0]
+        default_flag = roles[r][1]
+        script = f"INSERT INTO roles (name, default_flag, permissions) " \
+                 f"VALUES ('{r}','{default_flag}','{permissions}')"
+        execute_script(script, db)
 
 
-create_roles_db()
-create_user_db()
-insert_roles()
+def migrate(db):
+    create_roles_db(db)
+    create_user_db(db)
+    insert_roles(db)
+
+
+if __name__ == '__main__':
+    database = Path(__file__).resolve().parent / 'tm.db'
+    migrate(database)

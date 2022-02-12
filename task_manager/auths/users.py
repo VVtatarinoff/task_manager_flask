@@ -92,8 +92,8 @@ def login():                        # noqa 901
         try:
             user = User.query.filter_by(email=request.form['email']).one()
         except SQLAlchemyError:
-            flash('No such e-mail in database', 'error')
-            render_template('users/user_login.html', **context)
+            flash('Invalid email or password.', 'error')
+            return render_template('users/user_login.html', **context)
 
         if user and user.verify_password(request.form['psw']):
             login_user(user, form.remember_me.data)
@@ -107,7 +107,7 @@ def login():                        # noqa 901
             if previous_page and previous_page != url_for('users.log_out'):
                 return redirect(previous_page)
             return redirect(url_for('main.index'))
-        flash('Invalid username or password.')
+        flash('Invalid email or password.')
     return render_template('users/user_login.html', **context)
 
 
