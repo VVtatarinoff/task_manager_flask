@@ -60,12 +60,12 @@ def insert_roles(db):
         execute_script(script, db)
 
 
-def migrate(db):
+def migrate(name):
+    db = Path(__file__).resolve().parent / name
     create_roles_db(db)
     create_user_db(db)
     insert_roles(db)
 
 
 if __name__ == '__main__':
-    database = Path(__file__).resolve().parent / 'tm.db'
-    migrate(database)
+    migrate('tm.db')

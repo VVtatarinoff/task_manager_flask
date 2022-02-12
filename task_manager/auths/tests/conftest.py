@@ -5,7 +5,7 @@ import pytest
 from flask_sqlalchemy import SQLAlchemy
 
 from task_manager import create_app
-from task_manager import sql_migr
+from task_manager.sql_migr import migrate
 
 NEW_USER = {'name': 'test',
             'first_name': 'TEST',
@@ -22,7 +22,7 @@ def app():
 @pytest.fixture(scope='session')
 def db(app):
     db = SQLAlchemy(app)
-
+    migrate(app.config['SQLALCHEMY_DATABASE_URI'])
     return db
 
 @pytest.fixture(scope='session')
