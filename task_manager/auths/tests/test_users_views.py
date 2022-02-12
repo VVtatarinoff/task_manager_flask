@@ -10,14 +10,8 @@ NEW_USER = {'name': 'test',
             'password': 123456}
 
 
-#def test_registration(app, db_session):
-    #response = client.get(url_for('register'))
-#    user = User(name='test')
-#    g=1
-
-
-def test_post(app, client):
-  #  response = client.get(url_for('users.register'))
- #   assert response.status_code == 200
+def test_post(client):
+    response = client.get(url_for('users.register'))
+    assert response.status_code == 200
     response = client.post(url_for('users.register'), data=NEW_USER)
     assert response.status_code == 200
