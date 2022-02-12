@@ -2,7 +2,6 @@ import os
 import tempfile
 
 import pytest
-import pytest_flask_sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
 
 from task_manager import create_app
@@ -28,15 +27,3 @@ def _db(app):
     '''
     db = SQLAlchemy(app)
     return db
-
-"""
-@pytest.fixture
-def client(app):
-    #db_fd, db_path = tempfile.mkstemp()
-    #app = create_app({'TESTING': True, 'DATABASE': db_path})
-
-    with app.app_context():
-        with app.test_client() as client:
-            db = SQLAlchemy(app)
-            yield client
-"""
