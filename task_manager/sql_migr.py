@@ -1,15 +1,14 @@
 from pathlib import Path
 import sqlite3
 from task_manager.auths.models import Role, Permission
-from task_manager import db
+#from task_manager.manage import db
 
 DATABASE = Path(__file__).resolve().parent / 'tm.db'
 print('database: ', DATABASE, type(DATABASE))
 print(type(Path(__file__).resolve().parent))
 
 
-# db = sqlite3.connect(DATABASE)
-# SCRIPT = 'ALTER TABLE users ADD COLUMN password varchar(200)'
+db = sqlite3.connect(DATABASE)
 
 
 def execute_script(script):
@@ -55,15 +54,18 @@ def insert_roles():
     }
 
     for r in roles:
-        role = Role.query.filter_by(name=r).first()
-        if role is None:
-            role = Role(name=r)
-        role.permissions = roles[r][0]
-        role.default_flag = roles[r][1]
-        with db.session as ds:
-            ds.add(role)
-            ds.commit()
-
+        # role = Role.query.filter_by(name=r).first()
+        # if role is None:
+        #     role = Role(name=r)
+        permissions = roles[r][0]
+        default_flag = roles[r][1]
+        # with db.session as ds:
+        #     ds.add(role)
+        #     ds.commit()
+        script= f"INSERT INTO roles (name, default_flag, permissions) "\
+         f"VALUES ('{r}','{default_flag}','{permissions}')"
+        print(script)
+        execute_script(script)
 
 create_roles_db()
 create_user_db()
