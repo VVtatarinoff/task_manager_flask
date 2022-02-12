@@ -3,9 +3,9 @@ import tempfile
 
 import pytest
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_migrate import Migrate, upgrade
 from task_manager import create_app
-from task_manager.sql_migr import migrate
+
 
 NEW_USER = {'name': 'test',
             'first_name': 'TEST',
@@ -22,7 +22,9 @@ def app():
 @pytest.fixture(scope='session')
 def db(app):
     db = SQLAlchemy(app)
-    migrate(app.config['SQLALCHEMY_DATABASE_URI'])
+    with app.app_context():
+        migrate = Migrate(app, db)
+        upgrade()
     return db
 
 @pytest.fixture(scope='session')

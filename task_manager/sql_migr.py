@@ -57,6 +57,7 @@ def insert_roles(db):
         default_flag = roles[r][1]
         script = f"INSERT INTO roles (name, default_flag, permissions) " \
                  f"VALUES ('{r}','{default_flag}','{permissions}')"
+        print(script)
         execute_script(script, db)
 
 

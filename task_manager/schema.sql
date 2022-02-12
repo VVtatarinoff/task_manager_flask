@@ -21,3 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
     role_id INTEGER,
     FOREIGN KEY (role_id) REFERENCES roles(id)
     );
+
+INSERT INTO roles (name, default_flag, permissions) VALUES ('Executor','True','3')
+INSERT INTO roles (name, default_flag, permissions) VALUES ('Manager','False','7')
+INSERT INTO roles (name, default_flag, permissions) VALUES ('Administrator','False','255')
