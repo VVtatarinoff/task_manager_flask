@@ -89,7 +89,7 @@ def register():
 
 @users_bp.route('/login', methods=('POST', 'GET'))
 def login():  # noqa 901
-    logger.disabled=False
+    logger.disabled = False
     logger.debug(f'login request {request.method}')
     form = SignInForm()
     if current_user.is_authenticated:
@@ -98,12 +98,15 @@ def login():  # noqa 901
     context['form'] = form
     context['title'] = 'Authorization'
     if form.validate_on_submit():
-        logger.debug(f'validated login form: email {request.form["email"]} psw {request.form["psw"]}')
+        logger.debug(f'validated login form: email'
+                     f' {request.form["email"]} psw {request.form["psw"]}')
         try:
             user = User.query.filter_by(email=request.form['email']).one()
         except SQLAlchemyError:
             flash('Invalid email or password.', 'error')
-            logger.debug(f'login no such data in db: email {request.form["email"]} psw {request.form["psw"]}')
+            logger.debug(f'login no such data in db:'
+                         f' email {request.form["email"]} '
+                         f'psw {request.form["psw"]}')
             return render_template('users/user_login.html', **context)
 
         if user and user.verify_password(request.form['psw']):
@@ -125,7 +128,6 @@ def login():  # noqa 901
 @users_bp.route('/logout')
 @login_required
 def log_out():
-
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('main.index'))

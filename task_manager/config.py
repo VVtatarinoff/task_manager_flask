@@ -41,7 +41,8 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     ENV = 'production'
     SQLALCHEMY_DATABASE_URI = os.getenv(
-        'DATABASE_URL') or ('sqlite:///' + os.path.join(current_dir, 'data.sqlite'))
+        'DATABASE_URL') or ('sqlite:///' + os.path.join(current_dir,
+                                                        'data.sqlite'))
 
 
 config = {

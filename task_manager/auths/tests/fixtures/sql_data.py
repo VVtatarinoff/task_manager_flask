@@ -27,19 +27,25 @@ NEW_USER = {
     'last_name': fake.last_name(),
     'password': "".join(fake.random_letters(length=10))}
 
-SQLS =[
-    "INSERT INTO roles (name, default_flag, permissions) VALUES ('Executor','True','3')",
-    "INSERT INTO roles (name, default_flag, permissions) VALUES ('Manager','False','7')",
-    "INSERT INTO roles (name, default_flag, permissions) VALUES ('Administrator','False','255')",
-    "INSERT INTO users (email, name, first_name, last_name, password_hash, role_id)"
+SQLS = [
+    "INSERT INTO roles (name, default_flag, permissions) "
+    "VALUES ('Executor','True','3')",
+    "INSERT INTO roles (name, default_flag, permissions) "
+    "VALUES ('Manager','False','7')",
+    "INSERT INTO roles (name, default_flag, permissions) "
+    "VALUES ('Administrator','False','255')",
+    "INSERT INTO users (email, name, first_name, last_name, "
+    "password_hash, role_id)"
     f"VALUES ('{EXECUTOR['email']}', '{EXECUTOR['name']}', "
     f"'{EXECUTOR['first_name']}', '{EXECUTOR['last_name']}', "
     f"'{generate_password_hash(EXECUTOR['password'])}',1);",
-    "INSERT INTO users (email, name, first_name, last_name, password_hash, role_id)"
+    "INSERT INTO users (email, name, first_name, last_name, "
+    "password_hash, role_id)"
     f"VALUES ('{MANAGER['email']}', '{MANAGER['name']}', "
     f"'{MANAGER['first_name']}', '{MANAGER['last_name']}', "
     f"'{generate_password_hash(MANAGER['password'])}',2);",
-    "INSERT INTO users (email, name, first_name, last_name, password_hash, role_id)"
+    "INSERT INTO users (email, name, first_name, last_name, "
+    "password_hash, role_id)"
     f"VALUES ('{ADMINISTRATOR['email']}', '{ADMINISTRATOR['name']}', "
     f"'{ADMINISTRATOR['first_name']}', '{ADMINISTRATOR['last_name']}', "
     f"'{generate_password_hash(ADMINISTRATOR['password'])}',3);"

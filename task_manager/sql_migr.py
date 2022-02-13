@@ -1,6 +1,6 @@
 from pathlib import Path
 import sqlite3
-from task_manager.auths.models import Role, Permission
+from task_manager.auths.models import Permission
 
 
 def execute_script(script, database):
