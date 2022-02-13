@@ -1,8 +1,11 @@
 import pytest
 import urllib
+import faker
 from flask import url_for
 
 from task_manager.auths.models import Role, User
+
+
 
 NEW_USER = {'name': 'test',
             'first_name': 'TEST',
@@ -29,10 +32,13 @@ def test_url_register(client, db):
     assert parsed.path == url_for('users.login')
 
 
-def test_url_login(app, db, client):
+def test_url_login(app, db, client, faker):
     response = client.get(url_for('users.login'))
     assert response.status_code == 200
-    response = client.post(url_for('users.login'), data={'email': 'bla@gmail.com', 'password': '1234'}, follow_redirects=True)
+    response = client.post(url_for('users.login'),
+                           data={'email': faker.ascii_email(),
+                                 'password': '1234'},
+                           follow_redirects=True)
     assert response.status_code == 200
     assert b'Authorization' in response.data
 #    assert 'Invalid email or password' == app.session.get_flashed_messages()
