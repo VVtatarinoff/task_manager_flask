@@ -13,7 +13,7 @@ load_dotenv(dotenv_path=env_path)
 
 
 class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY')
+    SECRET_KEY = os.getenv('SECRET_KEY') or "very important key"
     TASK_MANAGER_ADMIN = os.getenv('EMAIL_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = True
@@ -35,7 +35,7 @@ class TestingConfig(Config):
     ENV = 'development'
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = os.getenv(
-        'TEST_DATABASE_URL')
+        'TEST_DATABASE_URL') or "sqlite://"
 
 
 class ProductionConfig(Config):
