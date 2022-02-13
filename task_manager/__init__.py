@@ -26,10 +26,12 @@ def init_logger():
     sm.setFormatter(formatter)
     sm.setLevel('CRITICAL')
     logger.addHandler(sm)
-    fn = logging.FileHandler(BASE_DIR / "logs/task_manager.log", mode='w')
-    fn.setFormatter(formatter)
-    fn.setLevel('DEBUG')
-    logger.addHandler(fn)
+    logger_file = BASE_DIR / "logs/task_manager.log"
+    if logger_file.is_file():
+        fn = logging.FileHandler(BASE_DIR / "logs/task_manager.log", mode='w')
+        fn.setFormatter(formatter)
+        fn.setLevel('DEBUG')
+        logger.addHandler(fn)
 
 
 def create_app(config_name):
