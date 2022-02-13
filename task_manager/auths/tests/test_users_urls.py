@@ -5,8 +5,6 @@ from flask import url_for
 
 from task_manager.auths.models import Role, User
 
-
-
 NEW_USER = {'name': 'test',
             'first_name': 'TEST',
             'last_name': 'TESTOFF',
@@ -14,7 +12,8 @@ NEW_USER = {'name': 'test',
             'psw1': 123456,
             'psw2': 123456}
 
-def test_url_logout(client,db):
+
+def test_url_logout(client, db):
     response = client.get(url_for('users.log_out'))
     assert response.status_code == 302
     parsed = urllib.parse.urlparse(response.location)
@@ -42,7 +41,3 @@ def test_url_login(app, db, client, faker):
     assert response.status_code == 200
     assert b'Authorization' in response.data
 #    assert 'Invalid email or password' == app.session.get_flashed_messages()
-
-
-
-
