@@ -1,5 +1,6 @@
 import logging
 import sys
+from pathlib import Path
 
 from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
@@ -9,7 +10,7 @@ from flask_moment import Moment
 
 from task_manager.config import config
 
-
+BASE_DIR = Path(__file__).resolve().parent.parent
 login_manager = LoginManager()
 moment = Moment()
 db = SQLAlchemy()
@@ -17,7 +18,7 @@ bootstrap = Bootstrap()
 
 
 def init_logger():
-    logger = logging.getLogger('page_loader')
+    logger = logging.getLogger('task_manager')
     logger.setLevel(logging.DEBUG)
     sm = logging.StreamHandler(stream=sys.stderr)
     formatter = logging.Formatter('%(asctime)s :: %(name)s :'
@@ -25,7 +26,7 @@ def init_logger():
     sm.setFormatter(formatter)
     sm.setLevel('CRITICAL')
     logger.addHandler(sm)
-    fn = logging.FileHandler('logs/task_manager.log', mode='w')
+    fn = logging.FileHandler(BASE_DIR / "logs/task_manager.log", mode='w')
     fn.setFormatter(formatter)
     fn.setLevel('DEBUG')
     logger.addHandler(fn)

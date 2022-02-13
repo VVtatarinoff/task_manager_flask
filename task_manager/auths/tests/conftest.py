@@ -1,3 +1,4 @@
+import logging
 import os
 import tempfile
 
@@ -9,8 +10,9 @@ from flask_login import current_user, login_required, login_user, logout_user
 from task_manager.auths.tests.fixtures.sql_data import SQLS, ADMINISTRATOR, MANAGER, NEW_USER, EXECUTOR
 from task_manager.auths.models import User
 
-
+logger = logging.getLogger(__name__)
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+
 
 @pytest.fixture(scope='session')
 def app():
@@ -22,7 +24,6 @@ def app():
 @pytest.fixture(scope='session')
 def db(app):
     db = SQLAlchemy(app)
-    # fixture_path = os.path.join(CURRENT_DIR, "fixtures/data.sql")
     with app.app_context():
         migrate = Migrate(app, db)
         upgrade()

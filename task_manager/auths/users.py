@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.exc import SQLAlchemyError
 from functools import wraps
 from datetime import datetime
@@ -14,6 +16,7 @@ from task_manager.auths.forms import (CreateUser, SignInForm,  # noqa 402
                                       EditProfileForm, EditProfileFormAdmin)  # noqa 402
 
 FILTERS = ['Administrator', 'Executor', 'Manager']
+logger = logging.getLogger(__name__)
 
 
 def permission_required(permission):
@@ -55,10 +58,13 @@ def inject_permissions():
 
 @users_bp.route('/register', methods=('POST', 'GET'))
 def register():
+    logger.disabled = False
+    logger.debug(f'user registration request {request.method}')
     form = CreateUser()
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     if form.validate_on_submit():
+        logger.debug(f'registration form validated {request.form["email"]}')
         try:
             user = User(email=request.form['email'],
                         name=request.form['name'],
@@ -72,6 +78,7 @@ def register():
             db.session.rollback()
             flash('Error during adding to DataBase', 'error')
         else:
+            logger.debug(f'user registered {request.form["email"]}')
             flash('User registered', 'success')
         return redirect(url_for('users.login'))
     context = dict()
@@ -81,7 +88,9 @@ def register():
 
 
 @users_bp.route('/login', methods=('POST', 'GET'))
-def login():                        # noqa 901
+def login():  # noqa 901
+    logger.disabled=False
+    logger.debug(f'login request {request.method}')
     form = SignInForm()
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -89,10 +98,12 @@ def login():                        # noqa 901
     context['form'] = form
     context['title'] = 'Authorization'
     if form.validate_on_submit():
+        logger.debug(f'validated login form: email {request.form["email"]} psw {request.form["psw"]}')
         try:
             user = User.query.filter_by(email=request.form['email']).one()
         except SQLAlchemyError:
             flash('Invalid email or password.', 'error')
+            logger.debug(f'login no such data in db: email {request.form["email"]} psw {request.form["psw"]}')
             return render_template('users/user_login.html', **context)
 
         if user and user.verify_password(request.form['psw']):
@@ -114,6 +125,7 @@ def login():                        # noqa 901
 @users_bp.route('/logout')
 @login_required
 def log_out():
+
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('main.index'))

@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 import urllib
 import faker
@@ -6,6 +8,8 @@ from task_manager.auths.tests.fixtures.sql_data import SQLS, ADMINISTRATOR, MANA
 from flask_login import current_user, login_user, logout_user
 
 from task_manager.auths.models import Role, User
+
+logger = logging.getLogger(__name__)
 
 NEW_USER = {'name': 'test',
             'first_name': 'TEST',
@@ -17,6 +21,8 @@ NEW_USER = {'name': 'test',
 
 def test_url_logout(client, db):
     response = client.get(url_for('users.log_out'))
+    logger.disabled = False
+    logger.debug(f'logout test GET - not logged, response {response.status_code}')
     parsed = urllib.parse.urlparse(response.location)
     msg = get_flashed_messages()
     assert response.status_code == 302
@@ -29,7 +35,10 @@ def test_url_logout(client, db):
 
 def test_logged_url_logout(app, authenticated_client, db):
     assert current_user.is_authenticated
+    logger.disabled = False
+    logger.debug(f'logout test GET - logged, before - current_user {current_user}')
     response = authenticated_client.open(url_for('users.log_out'), method="GET")
+    logger.debug(f'logout test GET - logged, after -current_user {current_user}')
     parsed = urllib.parse.urlparse(response.location)
     assert not current_user.is_authenticated
     assert response.status_code == 302
