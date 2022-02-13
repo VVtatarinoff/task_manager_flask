@@ -40,9 +40,9 @@ def test_logged_url_logout(app, authenticated_client, db):
     response = authenticated_client.open(url_for('users.log_out'), method="GET")
     logger.debug(f'logout test GET - logged, after -current_user {current_user}')
     parsed = urllib.parse.urlparse(response.location)
+    assert parsed.path == url_for('main.index')
     assert not current_user.is_authenticated
     assert response.status_code == 302
-    assert parsed.path == url_for('main.index')
     assert current_user.is_anonymous
 
 
@@ -57,15 +57,26 @@ def test_url_register(client, db):
     assert msg[0] == 'User registered'
 
 
-def test_url_login(app, db, client, faker):
+def test_url_wrong_login(app, db, client, faker):
     response = client.get(url_for('users.login'))
     assert response.status_code == 200
     response = client.post(url_for('users.login'),
                            data={'email': faker.ascii_email(),
-                                 'psw': '1234'})
+                                 'psw': '123456'})
     msg = get_flashed_messages()
+    assert msg[0] == 'Invalid email or password.'
     assert response.status_code == 200
     assert b'Authorization' in response.data
 
+
+def test_url_correct_login(app, db, client):
+    response = client.post(url_for('users.login'),
+                           data={'email': EXECUTOR['email'],
+                                 'psw': EXECUTOR['password']})
+    msg = get_flashed_messages()
+    parsed = urllib.parse.urlparse(response.location)
+    assert msg[0] == f"{EXECUTOR['name']} logged in"
+    assert response.status_code == 302
+    assert parsed.path == url_for('main.index')
 
 

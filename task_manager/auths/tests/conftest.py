@@ -34,7 +34,8 @@ def db(app):
 
 @pytest.fixture
 def authenticated_client(app, db):
-    with app.test_client() as cl:
+    with app.test_request_context():
+        cl = app.test_client()
         user = User.query.filter_by(email=EXECUTOR['email']).one()
         login_user(user)
         yield cl
