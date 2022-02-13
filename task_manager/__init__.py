@@ -1,3 +1,6 @@
+import logging
+import sys
+
 from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
@@ -11,6 +14,21 @@ login_manager = LoginManager()
 moment = Moment()
 db = SQLAlchemy()
 bootstrap = Bootstrap()
+
+
+def init_logger():
+    logger = logging.getLogger('page_loader')
+    logger.setLevel(logging.DEBUG)
+    sm = logging.StreamHandler(stream=sys.stderr)
+    formatter = logging.Formatter('%(asctime)s :: %(name)s :'
+                                  ': %(levelname)s :: %(message)s')
+    sm.setFormatter(formatter)
+    sm.setLevel('CRITICAL')
+    logger.addHandler(sm)
+    fn = logging.FileHandler('logs/task_manager.log', mode='w')
+    fn.setFormatter(formatter)
+    fn.setLevel('DEBUG')
+    logger.addHandler(fn)
 
 
 def create_app(config_name):
@@ -32,7 +50,7 @@ def create_app(config_name):
 
     app.register_blueprint(users_bp)
     app.register_blueprint(main_bp)
-
+    init_logger()
     return app
 
 if __name__ == '__main__':
