@@ -33,11 +33,14 @@ def test_url_logout(client, db):
     assert response.status_code == 405
 
 
-def test_logged_url_logout(app, authenticated_client, db):
+def test_logged_url_logout(app, client, db):
+    client.post(url_for('users.login'),
+                           data={'email': EXECUTOR['email'],
+                                 'psw': EXECUTOR['password']})
     assert current_user.is_authenticated
     logger.disabled = False
     logger.debug(f'logout test GET - logged, before - current_user {current_user}')
-    response = authenticated_client.open(url_for('users.log_out'), method="GET")
+    response = client.open(url_for('users.log_out'), method="GET")
     logger.debug(f'logout test GET - logged, after -current_user {current_user}')
     parsed = urllib.parse.urlparse(response.location)
     assert parsed.path == url_for('main.index')
@@ -78,5 +81,7 @@ def test_url_correct_login(app, db, client):
     assert msg[0] == f"{EXECUTOR['name']} logged in"
     assert response.status_code == 302
     assert parsed.path == url_for('main.index')
+    assert current_user.is_authenticated
+    assert current_user.email == EXECUTOR['email']
 
 
