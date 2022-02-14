@@ -1,5 +1,6 @@
 import faker
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 
 fake = faker.Faker()
 ADMINISTRATOR = {
@@ -35,18 +36,21 @@ SQLS = [
     "INSERT INTO roles (name, default_flag, permissions) "
     "VALUES ('Administrator','False','255')",
     "INSERT INTO users (email, name, first_name, last_name, "
-    "password_hash, role_id)"
+    "password_hash, role_id, 'creation_date')"
     f"VALUES ('{EXECUTOR['email']}', '{EXECUTOR['name']}', "
     f"'{EXECUTOR['first_name']}', '{EXECUTOR['last_name']}', "
-    f"'{generate_password_hash(EXECUTOR['password'])}',1);",
+    f"'{generate_password_hash(EXECUTOR['password'])}',1,"
+    f"'{datetime.utcnow()}');",
     "INSERT INTO users (email, name, first_name, last_name, "
-    "password_hash, role_id)"
+    "password_hash, role_id,'creation_date')"
     f"VALUES ('{MANAGER['email']}', '{MANAGER['name']}', "
     f"'{MANAGER['first_name']}', '{MANAGER['last_name']}', "
-    f"'{generate_password_hash(MANAGER['password'])}',2);",
+    f"'{generate_password_hash(MANAGER['password'])}',2, "
+    f"'{datetime.utcnow()}');",
     "INSERT INTO users (email, name, first_name, last_name, "
-    "password_hash, role_id)"
+    "password_hash, role_id,'creation_date')"
     f"VALUES ('{ADMINISTRATOR['email']}', '{ADMINISTRATOR['name']}', "
     f"'{ADMINISTRATOR['first_name']}', '{ADMINISTRATOR['last_name']}', "
-    f"'{generate_password_hash(ADMINISTRATOR['password'])}',3);"
+    f"'{generate_password_hash(ADMINISTRATOR['password'])}', 3, "
+    f"'{datetime.utcnow()}');"
 ]

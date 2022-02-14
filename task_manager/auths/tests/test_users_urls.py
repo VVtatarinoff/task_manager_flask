@@ -6,7 +6,7 @@ from flask import url_for, get_flashed_messages
 from task_manager.auths.tests.fixtures.sql_data import (
     ADMINISTRATOR, MANAGER, EXECUTOR)
 from flask_login import current_user
-from task_manager.auths.models import User, Permission, Role
+from task_manager.auths.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -93,10 +93,8 @@ def test_url_correct_login(app, db_app, client, user):
 
 
 def test_get_user_list(app, db_app, client):
-    assert app.extensions['moment'].__name__ == 'moment'
-    assert app.template_context_processors[None][1].__globals__[
-               '__name__'] == 'flask_moment'
-    response = client.get(url_for('users.get_user_list')+'?Executor=&Administrator=&Manager=')
+    response = client.get(
+        url_for('users.get_user_list') + '?Executor=&Administrator=&Manager=')
     assert response.status_code == 200
     assert b'Users' in response.data
     users_count = User.query.count()
