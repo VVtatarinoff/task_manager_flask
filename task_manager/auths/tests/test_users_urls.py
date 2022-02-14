@@ -54,9 +54,13 @@ def test_logged_url_logout(app, client, db_app):
 def test_url_register(client, db_app):
     response = client.get(url_for('users.register'))
     assert response.status_code == 200
+    users_count = User.query.count()
     response = client.post(url_for('users.register'), data=NEW_USER)
     parsed = urllib.parse.urlparse(response.location)
     msg = get_flashed_messages()
+    assert users_count + 1 == User.query.count()
+    User.query.filter_by(name=NEW_USER['name']).delete()
+    db_app.session.commit()
     assert response.status_code == 302
     assert parsed.path == url_for('users.login')
     assert msg[0] == 'User registered'
@@ -92,10 +96,9 @@ def test_get_user_list(app, db_app, client):
     assert app.extensions['moment'].__name__ == 'moment'
     assert app.template_context_processors[None][1].__globals__[
                '__name__'] == 'flask_moment'
-    # include_moment = app.extensions['moment'].include_moment()
-    # assert include_moment==1
     response = client.get(url_for('users.get_user_list')+'?Executor=&Administrator=&Manager=')
     assert response.status_code == 200
     assert b'Users' in response.data
+    users_count = User.query.count()
     lines = response.data.count(b'</tr')
-    assert lines == 3
+    assert lines == users_count
