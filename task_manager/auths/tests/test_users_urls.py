@@ -100,3 +100,20 @@ def test_get_user_list(app, db_app, client):
     users_count = User.query.count()
     lines = response.data.count(b'</tr')
     assert lines == users_count
+
+
+@pytest.mark.parametrize('qry', [('?Executor=&Administrator=&Manager=', 3),
+                                 ('?Executor=&Administrator=', 2),
+                                 ('?Executor=&Manager=', 2),
+                                 ('?Manager=&Administrator=', 2),
+                                 ('?Executor=', 1),
+                                 ('?Manager=', 1),
+                                 ('?Administrator=', 1),
+                                 ('', 0)])
+def test_get_user_list_filtered(app, db_app, client, qry):
+    response = client.get(
+        url_for('users.get_user_list') + qry[0])
+    assert response.status_code == 200
+    users_count = qry[1]
+    lines = response.data.count(b'</tr')
+    assert lines == users_count
