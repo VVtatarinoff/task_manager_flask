@@ -59,8 +59,15 @@ def test_url_register(client, db_app):
     parsed = urllib.parse.urlparse(response.location)
     msg = get_flashed_messages()
     assert users_count + 1 == User.query.count()
+    new_user = User.query.filter_by(name=NEW_USER['name']).one()
+    assert new_user.role_id
+    assert new_user.creation_date
+    assert new_user.last_seen
+    assert new_user.password_hash != NEW_USER['psw1']
+    #new_user.delete()
     User.query.filter_by(name=NEW_USER['name']).delete()
     db_app.session.commit()
+    assert users_count == User.query.count()
     assert response.status_code == 302
     assert parsed.path == url_for('users.login')
     assert msg[0] == 'User registered'
@@ -117,3 +124,70 @@ def test_get_user_list_filtered(app, db_app, client, qry):
     users_count = qry[1]
     lines = response.data.count(b'</tr')
     assert lines == users_count
+
+
+@pytest.mark.parametrize('user', [ADMINISTRATOR, EXECUTOR, MANAGER])
+def test_profile_unauthorized(app, db_app, client, user):
+    response = client.post(url_for('users.show_profile', username=user['name']))
+    assert response.status_code == 405
+    response = client.get(url_for('users.show_profile', username=user['name']))
+    assert response.status_code == 302
+
+
+@pytest.mark.parametrize('user', [ADMINISTRATOR, EXECUTOR, MANAGER])
+def test_profile_authorized(app, db_app, client, user):
+    _user = User.query.filter_by(name=user['name']).one()
+    client.post(url_for('users.login'),
+                data={'email': user['email'],
+                      'psw': user['password']})
+    response = client.get(url_for('users.show_profile', username=user['name']))
+    assert response.status_code == 200
+    assert b'User profile' in response.data
+    assert bytes(_user.name, 'utf-8') in response.data
+    assert bytes(_user.email, 'utf-8') in response.data
+    assert bytes(_user.first_name, 'utf-8') in response.data
+    assert bytes(_user.last_name, 'utf-8') in response.data
+    assert bytes(_user.role.name, 'utf-8') in response.data
+
+
+@pytest.mark.parametrize('user', [ADMINISTRATOR, EXECUTOR, MANAGER])
+def test_profile_edit_unauthorized(app, client, user):
+    response = client.get(url_for('users.edit_profile', username=user['name']))
+    msg = get_flashed_messages()
+    parsed = urllib.parse.urlparse(response.location)
+    assert msg[0] == 'Please log in to access this page.'
+    assert response.status_code == 302
+    assert parsed.path == url_for('users.login')
+    response = client.post(url_for('users.edit_profile', username=user['name']))
+    assert response.status_code == 302
+    assert msg[0] == 'Please log in to access this page.'
+    assert response.status_code == 302
+    assert parsed.path == url_for('users.login')
+
+
+@pytest.mark.parametrize('user', [EXECUTOR, MANAGER])
+def test_profile_edit_authorized(app, client, user):
+    _user = User.query.filter_by(name=user['name']).one()
+    client.post(url_for('users.login'),
+                data={'email': user['email'],
+                      'psw': user['password']})
+    response = client.get(url_for('users.edit_profile', username=user['name']))
+    title = f"Edit profile of {user['name']}"
+    assert response.status_code == 200
+    assert bytes(title, 'utf-8') in response.data
+    assert bytes(_user.name, 'utf-8') in response.data
+    assert bytes('value="' + _user.name, 'utf-8') not in response.data
+    assert bytes('value="' + _user.first_name, 'utf-8') in response.data
+    assert bytes('value="' + _user.last_name, 'utf-8') in response.data
+    assert bytes('value="' + _user.email, 'utf-8') not in response.data
+    assert bytes('>' + _user.role.name + '<', 'utf-8') not in response.data
+
+@pytest.mark.parametrize('user', [ADMINISTRATOR, ])
+def test_profile_edit_administrator(app, client, user):
+    _user = User.query.filter_by(name=user['name']).one()
+    client.post(url_for('users.login'),
+                data={'email': user['email'],
+                      'psw': user['password']})
+    response = client.get(url_for('users.edit_profile', username=user['name']))
+    assert bytes('value="' + _user.email, 'utf-8') in response.data
+    assert bytes('>' + _user.role.name + '<', 'utf-8') in response.data

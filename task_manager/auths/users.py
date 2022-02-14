@@ -70,7 +70,7 @@ def register():
                         name=request.form['name'],
                         first_name=request.form['first_name'],
                         last_name=request.form['last_name'],
-                        password=request.form['psw1']
+                        password=request.form['psw1'],
                         )
             db.session.add(user)
             db.session.commit()

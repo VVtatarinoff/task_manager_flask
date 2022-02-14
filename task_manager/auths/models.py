@@ -46,7 +46,7 @@ class User(UserMixin, db.Model):
             if self.email == current_app.config['TASK_MANAGER_ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
             else:
-                self.role = Role.query.filter_by(default_flag=True).first()
+                self.role = Role.query.filter_by(default_flag='True').first()
 
     @property
     def password(self):

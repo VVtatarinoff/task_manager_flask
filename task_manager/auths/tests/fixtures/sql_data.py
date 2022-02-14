@@ -5,25 +5,25 @@ from datetime import datetime
 fake = faker.Faker()
 ADMINISTRATOR = {
     'email': fake.ascii_email(),
-    'name': 'administrator',
+    'name': fake.first_name(),
     'first_name': fake.first_name(),
     'last_name': fake.last_name(),
     'password': "".join(fake.random_letters(length=10))}
 EXECUTOR = {
     'email': fake.ascii_email(),
-    'name': 'executor',
+    'name': fake.first_name(),
     'first_name': fake.first_name(),
     'last_name': fake.last_name(),
     'password': "".join(fake.random_letters(length=10))}
 MANAGER = {
     'email': fake.ascii_email(),
-    'name': 'manager',
+    'name': fake.first_name(),
     'first_name': fake.first_name(),
     'last_name': fake.last_name(),
     'password': "".join(fake.random_letters(length=10))}
 NEW_USER = {
     'email': fake.ascii_email(),
-    'name': 'new',
+    'name': fake.first_name(),
     'first_name': fake.first_name(),
     'last_name': fake.last_name(),
     'password': "".join(fake.random_letters(length=10))}
