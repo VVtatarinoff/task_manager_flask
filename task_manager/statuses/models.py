@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey   # noqa 401
 from datetime import datetime
 from task_manager import db
 

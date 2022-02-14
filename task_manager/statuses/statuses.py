@@ -1,9 +1,8 @@
 import logging
 
-from sqlalchemy.exc import SQLAlchemyError
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import current_user, login_required
-from sqlalchemy.orm import load_only
+from flask import Blueprint, redirect, url_for
+from flask_login import login_required
+
 
 status_bp = Blueprint('statuses', __name__, template_folder='templates')
 
