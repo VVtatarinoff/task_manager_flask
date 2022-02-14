@@ -10,6 +10,7 @@ from flask_moment import Moment
 
 from task_manager.config import config
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 login_manager = LoginManager()
 moment = Moment()
@@ -49,12 +50,16 @@ def create_app(config_name):
     from task_manager.auths.users import users_bp  # noqa 402
     from task_manager.main import main_bp  # noqa 402
     from task_manager.statuses.statuses import status_bp # noqa 402
+    from task_manager.tags.tags import tags_bp  # noqa 402
+    from task_manager.tasks.tasks import tasks_bp # noqa 402
 
     login_manager.anonymous_user = AnonymousUser
 
     app.register_blueprint(users_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(status_bp)
+    app.register_blueprint(tags_bp)
+    app.register_blueprint(tasks_bp)
     init_logger()
     return app
 
