@@ -64,7 +64,6 @@ def test_url_register(client, db_app):
     assert new_user.creation_date
     assert new_user.last_seen
     assert new_user.password_hash != NEW_USER['psw1']
-    #new_user.delete()
     User.query.filter_by(name=NEW_USER['name']).delete()
     db_app.session.commit()
     assert users_count == User.query.count()
@@ -181,6 +180,7 @@ def test_profile_edit_authorized(app, client, user):
     assert bytes('value="' + _user.last_name, 'utf-8') in response.data
     assert bytes('value="' + _user.email, 'utf-8') not in response.data
     assert bytes('>' + _user.role.name + '<', 'utf-8') not in response.data
+
 
 @pytest.mark.parametrize('user', [ADMINISTRATOR, ])
 def test_profile_edit_administrator(app, client, user):
