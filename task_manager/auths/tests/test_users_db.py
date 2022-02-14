@@ -41,7 +41,7 @@ def test_user_self_or_admin_required(app, db_app, client):
     logged_user = User.query.filter_by(email=EXECUTOR['email']).one()
     login_user(logged_user)
     assert current_user.is_authenticated
-    msg = 'access denyied test'
+    msg = 'access denied test'
     decorator = self_or_admin_required(msg)
     response = decorator(bool)(ADMINISTRATOR['name'])
     parsed = urllib.parse.urlparse(response.location)
