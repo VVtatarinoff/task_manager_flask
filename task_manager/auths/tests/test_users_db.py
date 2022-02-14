@@ -1,7 +1,7 @@
 import urllib
 
-import pytest
 import werkzeug
+
 from flask import url_for, get_flashed_messages
 from flask_login import current_user, login_user
 
