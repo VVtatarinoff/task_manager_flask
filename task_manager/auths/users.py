@@ -135,6 +135,9 @@ def log_out():
 
 @users_bp.route('/users')
 def get_user_list():
+    logger.disabled = False
+    logger.debug(f'User list request {request.method}, ars {request.args}')
+    logger.debug(f'User list request, users = {list(User.query.all())}')
     request_filter = dict([(x, x in request.args) for x in FILTERS])
     context = dict()
     context.update(request_filter)
@@ -143,9 +146,11 @@ def get_user_list():
                               'Full name', 'Creation date')
     checked_options = list(filter(lambda item: item[1], request_filter.items()))
     checked_options = list(map(lambda x: x[0], checked_options))
+    logger.debug(f'User list request, checked_id = {checked_options}')
     checked_id = Role.query.filter(
         Role.name.in_(checked_options)).options(load_only('id')).all()
     checked_id = list(map(lambda x: x.id, checked_id))
+    logger.debug(f'User list request, checked_id = {checked_id}')
     users = []
 
     try:

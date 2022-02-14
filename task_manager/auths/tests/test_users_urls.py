@@ -6,6 +6,7 @@ from flask import url_for, get_flashed_messages
 from task_manager.auths.tests.fixtures.sql_data import (
     ADMINISTRATOR, MANAGER, EXECUTOR)
 from flask_login import current_user
+from task_manager.auths.models import User, Permission, Role
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ NEW_USER = {'name': 'test',
             'psw2': 123456}
 
 
-def test_url_logout(client, db):
+def test_url_logout(client, db_app):
     response = client.get(url_for('users.log_out'))
     logger.disabled = False
     logger.debug(f'logout test GET - not logged, '
@@ -32,7 +33,7 @@ def test_url_logout(client, db):
     assert response.status_code == 405
 
 
-def test_logged_url_logout(app, client, db):
+def test_logged_url_logout(app, client, db_app):
     client.post(url_for('users.login'),
                 data={'email': EXECUTOR['email'],
                       'psw': EXECUTOR['password']})
@@ -50,7 +51,7 @@ def test_logged_url_logout(app, client, db):
     assert current_user.is_anonymous
 
 
-def test_url_register(client, db):
+def test_url_register(client, db_app):
     response = client.get(url_for('users.register'))
     assert response.status_code == 200
     response = client.post(url_for('users.register'), data=NEW_USER)
@@ -61,7 +62,7 @@ def test_url_register(client, db):
     assert msg[0] == 'User registered'
 
 
-def test_url_wrong_login(app, db, client, faker):
+def test_url_wrong_login(app, db_app, client, faker):
     response = client.get(url_for('users.login'))
     assert response.status_code == 200
     response = client.post(url_for('users.login'),
@@ -74,7 +75,7 @@ def test_url_wrong_login(app, db, client, faker):
 
 
 @pytest.mark.parametrize('user', [ADMINISTRATOR, EXECUTOR, MANAGER])
-def test_url_correct_login(app, db, client, user):
+def test_url_correct_login(app, db_app, client, user):
     response = client.post(url_for('users.login'),
                            data={'email': user['email'],
                                  'psw': user['password']})
@@ -85,3 +86,16 @@ def test_url_correct_login(app, db, client, user):
     assert parsed.path == url_for('main.index')
     assert current_user.is_authenticated
     assert current_user.email == user['email']
+
+
+def test_get_user_list(app, db_app, client):
+    assert app.extensions['moment'].__name__ == 'moment'
+    assert app.template_context_processors[None][1].__globals__[
+               '__name__'] == 'flask_moment'
+    # include_moment = app.extensions['moment'].include_moment()
+    # assert include_moment==1
+    response = client.get(url_for('users.get_user_list')+'?Executor=&Administrator=&Manager=')
+    assert response.status_code == 200
+    assert b'Users' in response.data
+    lines = response.data.count(b'</tr')
+    assert lines == 3

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+
 {% block filter %}
 
 <div class="card mb-3 bg-secondary">
@@ -46,13 +47,13 @@
         {% endfor %}
     </thead>
     <tbody>
-    {% for u in table_data %}
+    {% for user in table_data %}
         <tr class="">
 
-            <td>{{ u.id }}</td>
-            <td><a href={{ url_for('users.show_profile', username=u.name) }}> {{ u.name }} </a></td>
-            <td>{{ u.first_name }} {{ u.last_name }}</td>
-            <td>{{ u.creation_date.strftime('%d-%m-%Y') }}</td>
+            <td>{{ user.id }}</td>
+            <td><a href={{ url_for('users.show_profile', username=user.name) }}> {{ user.name }} </a></td>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+            <td>{{ (moment(user.creation_date).format('%d-%m-%Y')) }}</td>
 
         </tr>
     {% endfor %}

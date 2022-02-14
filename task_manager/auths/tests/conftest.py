@@ -4,7 +4,7 @@ import os
 import pytest
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade
-from task_manager import create_app
+from task_manager import create_app, db
 from task_manager.auths.tests.fixtures.sql_data import SQLS
 
 logger = logging.getLogger(__name__)
@@ -19,12 +19,12 @@ def app():
 
 
 @pytest.fixture(scope='session')
-def db(app):
-    db = SQLAlchemy(app)
+def db_app(app):
+    # db = SQLAlchemy(app)
     with app.app_context():
         migrate = Migrate(app, db)      # noqa 481
         upgrade()
         with db.engine.connect() as con:
             for sql in SQLS:
                 con.execute(sql)
-    return db
+        yield db
