@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+<h1>#{{ tag.name }}</h1>
+
+<p> Description:
+
+    <br>
+    {{ tag.description }}
+        </a>
+
+</p>
+    <a class="btn btn-default" href="{{ url_for('tags.edit_tag', id=tag.id) }}">
+    Edit Tag
+    </a>
+
+</div>
+
+{% endblock content %}

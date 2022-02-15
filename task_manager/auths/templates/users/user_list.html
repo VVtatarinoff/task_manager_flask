@@ -54,6 +54,7 @@
             <td><a href={{ url_for('users.show_profile', username=user.name) }}> {{ user.name }} </a></td>
             <td>{{ user.first_name }} {{ user.last_name }}</td>
             <td>{{ user.creation_date.strftime('%d-%m-%Y')}}</td>
+            <td>{{ user.role.name }}</td>
 
         </tr>
     {% endfor %}

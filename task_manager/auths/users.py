@@ -143,7 +143,7 @@ def get_user_list():
     context.update(request_filter)
     context['title'] = 'Users'
     context['table_heads'] = ('ID', 'User name',
-                              'Full name', 'Creation date')
+                              'Full name', 'Creation date', 'Role')
     checked_options = list(filter(lambda item: item[1], request_filter.items()))
     checked_options = list(map(lambda x: x[0], checked_options))
     logger.debug(f'User list request, checked_id = {checked_options}')
