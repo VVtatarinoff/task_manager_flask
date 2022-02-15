@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from task_manager import db
 from task_manager import login_manager
+from task_manager.tasks.models import Task
 
 
 class Permission:
@@ -40,8 +41,8 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     role_id = db.Column(db.Integer, ForeignKey('roles.id'))
 
-    task_executor = db.relationship('Task', backref='executor_user', lazy='dynamic')
-    task_manager = db.relationship('Task', backref='manager_user', lazy='dynamic')
+    task_executor = db.relationship('Task', backref='executor_user', foreign_keys="[Task.executor_id]")
+    task_manager = db.relationship('Task', backref='manager_user', foreign_keys="[Task.manager_id]")
     plan_executor = db.relationship('Plan', backref='executor', lazy='dynamic')
 
     def __init__(self, **kwargs):

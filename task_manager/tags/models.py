@@ -9,5 +9,3 @@ class Tag(db.Model):
     name = db.Column(db.String(20), unique=True, nullable=False)
     creation_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     description = db.Column(db.String(200))
-
-    intermediate_task = db.relationship('IntermediateTaskPlan', backref='tag', lazy='dynamic')
