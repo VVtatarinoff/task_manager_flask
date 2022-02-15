@@ -1,7 +1,8 @@
-from sqlalchemy import ForeignKey, Table  # noqa 401
+from sqlalchemy import ForeignKey, Table
 from datetime import datetime, date
 from task_manager import db
-from task_manager.tags.models import Tag
+from task_manager.tags.models import Tag  # noqa 401
+
 
 class Plan(db.Model):
     __tablename__ = 'plans'
@@ -28,12 +29,13 @@ class Task(db.Model):
     __tablename__ = 'tasks'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
-    creation_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    creation_date = db.Column(
+        db.DateTime, default=datetime.utcnow, nullable=False)
     description = db.Column(db.String(200))
     manager_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
     executor_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
     start_date = db.Column(db.Date, default=date.today, nullable=False)
-    planned_end_date= db.Column(db.Date, nullable=False)
+    planned_end_date = db.Column(db.Date, nullable=False)
     actual_end_date = db.Column(db.Date, nullable=False)
     post_to_review = db.Column(db.Boolean, default=False, nullable=False)
 
