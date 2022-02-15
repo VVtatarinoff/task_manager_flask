@@ -39,7 +39,7 @@ class User(UserMixin, db.Model):
     creation_date = db.Column(db.DateTime, default=datetime.utcnow)
     password_hash = db.Column(db.String(200), nullable=False)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    role_id = db.Column(db.Integer, ForeignKey('roles.id'))
+    role_id = db.Column(db.Integer, ForeignKey('roles.id'), nullable=False)
 
     task_executor = db.relationship(
         'Task', backref='executor_user', foreign_keys="[Task.executor_id]")
