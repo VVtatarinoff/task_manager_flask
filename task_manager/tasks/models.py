@@ -31,3 +31,6 @@ class Task(db.Model):
     planned_end_date= db.Column(db.Date, nullable=False)
     actual_end_date = db.Column(db.Date, nullable=False)
     post_to_review = db.Column(db.Boolean, default=False, nullable=False)
+
+    intermediate_tag = db.relationship('IntermediateTaskPlan', backref='task', lazy='dynamic')
+    plan = db.relationship('Plan', backref='task', lazy='dynamic')

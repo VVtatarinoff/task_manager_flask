@@ -40,6 +40,10 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     role_id = db.Column(db.Integer, ForeignKey('roles.id'))
 
+    task_executor = db.relationship('Task', backref='executor_user', lazy='dynamic')
+    task_manager = db.relationship('Task', backref='manager_user', lazy='dynamic')
+    plan_executor = db.relationship('Plan', backref='executor', lazy='dynamic')
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
