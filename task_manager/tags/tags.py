@@ -37,8 +37,8 @@ def show_tags_list():
 
 
 @tags_bp.route('/create_tag', methods=('POST', 'GET'))
-@permission_required(Permission.MANAGE)
 @login_required
+@permission_required(Permission.MANAGE)
 def create_tag():
     logger.disabled = False
     logger.debug(f'tag creation request {request.method}')
