@@ -1,15 +1,17 @@
 import logging
-import os
+from pathlib import Path
 
 import pytest
 from flask_migrate import Migrate, upgrade
+
 from task_manager import create_app, db
 from task_manager.auths.tests.fixtures.sql_data import (
     SQLS, ADMINISTRATOR, EXECUTOR, MANAGER)
 from task_manager.auths.models import Permission
 
 logger = logging.getLogger(__name__)
-CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+CURRENT_DIR = Path(__file__).resolve().parent
+BASE_DIR = CURRENT_DIR.parent.parent
 
 permission_mapping = [
     {(ADMINISTRATOR['email'], ADMINISTRATOR['password']): {
@@ -41,7 +43,8 @@ def db_app(app):
     # db = SQLAlchemy(app)
     with app.app_context():
         migrate = Migrate(app, db)  # noqa 481
-        upgrade()
+        directory = BASE_DIR / 'migrations'
+        upgrade(directory=directory)
         with db.engine.connect() as con:
             for sql in SQLS:
                 con.execute(sql)

@@ -12,7 +12,8 @@ tags_bp = Blueprint('tags', __name__, template_folder='templates')
 
 from task_manager import db  # noqa 402
 from task_manager.auths.models import User, Permission, Role  # noqa 402
-from task_manager.auths.users import permission_required
+from task_manager.auths.users import permission_required  # noqa 402
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,7 +48,7 @@ def create_tag():
         try:
             tag = Tag(name=request.form['name'],
                       description=request.form['description'],
-                        )
+                      )
             db.session.add(tag)
             db.session.commit()
         except SQLAlchemyError:

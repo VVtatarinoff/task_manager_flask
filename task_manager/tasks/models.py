@@ -2,7 +2,8 @@ from sqlalchemy import ForeignKey, Table
 from datetime import datetime, date
 from task_manager import db
 from task_manager.tags.models import Tag  # noqa 401
-from task_manager.statuses.models import Status
+from task_manager.statuses.models import Status  # noqa 401
+
 
 class Plan(db.Model):
     __tablename__ = 'plans'
