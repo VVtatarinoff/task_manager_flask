@@ -15,7 +15,7 @@
         <tr class="">
 
             <td>{{ tag.id }}</td>
-            <td><a href={{ url_for('tags.show_tags_list') }}> {{ tag.name }} </a></td>
+            <td><a href={{ url_for('tags.show_tag_detail', id=tag.id) }}> {{ tag.name }} </a></td>
             <td>{{ tag.creation_date.strftime('%d-%m-%Y')}}</td>
 
         </tr>
