@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from flask import Flask
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
@@ -16,6 +17,7 @@ login_manager = LoginManager()
 moment = Moment()
 db = SQLAlchemy()
 bootstrap = Bootstrap()
+migrate = Migrate()
 
 
 def init_logger():
@@ -42,6 +44,7 @@ def create_app(config_name):
     bootstrap.init_app(app)
     moment.init_app(app)
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.session_protection = 'strong'
     login_manager.login_view = 'users.login'
     login_manager.init_app(app)
