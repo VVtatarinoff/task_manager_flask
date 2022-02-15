@@ -16,15 +16,17 @@ NEW_TAG = {'name': fake.pystr(min_chars=5, max_chars=20),
            'description': fake.street_address()}
 
 
-def test_unauthorized_show_tags_list(app, db_app, client):
+@pytest.mark.parametrize('page', ['tags.show_tags_list',
+                                  'tags.show_tag_detail'])
+def test_unlogged_get_pages(app, db_app, client, page):
     response = client.get(
-        url_for('tags.show_tags_list'))
+        url_for(page, id=1))
     assert response.status_code == 302
     msg = get_flashed_messages()
     assert msg[0] == 'Please log in to access this page.'
     parsed = urllib.parse.urlparse(response.location)
     assert parsed.path == url_for('users.login')
-    response = client.post(url_for('tags.show_tags_list'))
+    response = client.post(url_for(page, id=1))
     assert response.status_code == 405
 
 
@@ -98,3 +100,6 @@ def test_authorized_create_tag(db_app, client):
     assert response.status_code == 302
     assert parsed.path == url_for('tags.show_tags_list')
     assert msg[0] == f'Tag {NEW_TAG["name"]} created'
+
+
+
