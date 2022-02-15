@@ -5,7 +5,7 @@ import pytest
 from flask_migrate import Migrate, upgrade
 
 from task_manager import create_app, db
-from task_manager.auths.tests.fixtures.sql_data import (
+from task_manager.database.test_sql_data import (
     SQLS, ADMINISTRATOR, EXECUTOR, MANAGER)
 from task_manager.auths.models import Permission
 

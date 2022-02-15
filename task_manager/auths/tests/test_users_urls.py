@@ -3,7 +3,7 @@ import logging
 import pytest  # noqa 401
 import urllib
 from flask import url_for, get_flashed_messages
-from task_manager.auths.tests.fixtures.sql_data import (
+from task_manager.database.test_sql_data import (
     ADMINISTRATOR, MANAGER, EXECUTOR)
 from flask_login import current_user
 from task_manager.auths.models import User
@@ -158,9 +158,10 @@ def test_profile_edit_unauthorized(app, client, user):
     assert response.status_code == 302
     assert parsed.path == url_for('users.login')
     response = client.post(url_for('users.edit_profile', username=user['name']))
-    assert response.status_code == 302
+    msg = get_flashed_messages()
     assert msg[0] == 'Please log in to access this page.'
     assert response.status_code == 302
+    parsed = urllib.parse.urlparse(response.location)
     assert parsed.path == url_for('users.login')
 
 

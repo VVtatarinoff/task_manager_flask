@@ -28,13 +28,14 @@ NEW_USER = {
     'last_name': fake.last_name(),
     'password': "".join(fake.random_letters(length=10))}
 
-SQLS = [
+SQL_ROLES = [
     "INSERT INTO roles (name, default_flag, permissions) "
     "VALUES ('Executor','True','3')",
     "INSERT INTO roles (name, default_flag, permissions) "
     "VALUES ('Manager','False','7')",
     "INSERT INTO roles (name, default_flag, permissions) "
-    "VALUES ('Administrator','False','255')",
+    "VALUES ('Administrator','False','255')", ]
+SQL_USERS = [
     "INSERT INTO users (email, name, first_name, last_name, "
     "password_hash, role_id, 'creation_date')"
     f"VALUES ('{EXECUTOR['email']}', '{EXECUTOR['name']}', "
@@ -54,3 +55,17 @@ SQLS = [
     f"'{generate_password_hash(ADMINISTRATOR['password'])}', 3, "
     f"'{datetime.utcnow()}');"
 ]
+
+TAGS = []
+TAG_QNTY = 5
+SQL_TAGS = []
+for i in range(1, TAG_QNTY + 1):
+    name = fake.pystr(min_chars=5, max_chars=20)
+    description = fake.street_address()
+    TAGS += [{'name': name,
+              'description': description}]
+    SQL_TAGS += [
+        "INSERT INTO tags (id, name, description, creation_date) "
+        f"VALUES ({i}, '{name}', '{description}', '{datetime.utcnow()}')"
+    ]
+SQLS = SQL_ROLES + SQL_USERS + SQL_TAGS
