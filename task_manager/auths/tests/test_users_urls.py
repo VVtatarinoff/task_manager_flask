@@ -166,7 +166,7 @@ def test_profile_edit_unauthorized(app, client, user):
 
 
 @pytest.mark.parametrize('user', [EXECUTOR, MANAGER])
-def test_profile_edit_authorized(app, client, user):
+def test_profile_edit_authorized_get(app, client, user):
     _user = User.query.filter_by(name=user['name']).one()
     client.post(url_for('users.login'),
                 data={'email': user['email'],
@@ -183,8 +183,45 @@ def test_profile_edit_authorized(app, client, user):
     assert bytes('>' + _user.role.name + '<', 'utf-8') not in response.data
 
 
+@pytest.mark.parametrize('user', [EXECUTOR, MANAGER])
+def test_profile_edit_authorized_post(app, client, user):
+    _user = User.query.filter_by(name=user['name']).one()
+    id = _user.id
+    client.post(url_for('users.login'),
+                data={'email': user['email'],
+                      'psw': user['password']})
+    new_first_name = _user.first_name + 'test'
+    new_last_name = _user.last_name + 'test'
+    new_name = _user.name + 'test'
+    new_email = 'test' + _user.email
+    old_role_id = _user.role_id
+    new_role_id = 3
+    location = "TEST"
+    users_count = User.query.count()
+    response = client.post(url_for('users.edit_profile', username=user['name']),
+                           data={'first_name': new_first_name,
+                                 'last_name': new_last_name,
+                                 'location': location,
+                                 'name': new_name,
+                                 'role_id': new_role_id,
+                                 'email': new_email}, )
+
+    msg_expected = f'Profile of {_user.name} has been updated.'
+    msg_received = get_flashed_messages()
+    _user = User.query.filter_by(id=id).one()
+    assert msg_expected in msg_received
+    assert response.status_code == 302
+    assert users_count == User.query.count()
+    assert _user.location == location
+    assert _user.first_name == new_first_name
+    assert _user.last_name == new_last_name
+    assert _user.name == user['name']
+    assert _user.email == user['email']
+    assert _user.role_id == old_role_id
+
+
 @pytest.mark.parametrize('user', [ADMINISTRATOR, ])
-def test_profile_edit_administrator(app, client, user):
+def test_profile_edit_administrator_get(app, client, user):
     _user = User.query.filter_by(name=user['name']).one()
     client.post(url_for('users.login'),
                 data={'email': user['email'],
@@ -192,3 +229,39 @@ def test_profile_edit_administrator(app, client, user):
     response = client.get(url_for('users.edit_profile', username=user['name']))
     assert bytes('value="' + _user.email, 'utf-8') in response.data
     assert bytes('>' + _user.role.name + '<', 'utf-8') in response.data
+
+
+@pytest.mark.parametrize('user', [ADMINISTRATOR, ])
+def test_profile_edit_administrator_post(app, client, user):
+    _user = User.query.filter_by(name=MANAGER['name']).one()
+    id = _user.id
+    client.post(url_for('users.login'),
+                data={'email': user['email'],
+                      'psw': user['password']})
+    new_first_name = _user.first_name + 'test'
+    new_last_name = _user.last_name + 'test'
+    new_name = _user.name + 'test'
+    new_email = 'test' + _user.email
+    old_role_id = _user.role_id
+    new_role_id = old_role_id + 1
+    location = "TEST"
+    users_count = User.query.count()
+    response = client.post(url_for('users.edit_profile', username=_user.name),
+                           data={'first_name': new_first_name,
+                                 'last_name': new_last_name,
+                                 'location': location,
+                                 'name': new_name,
+                                 'role': new_role_id,
+                                 'email': new_email}, )
+    _user = User.query.filter_by(id=id).one()
+    msg_expected = f'Profile of {_user.name} has been updated.'
+    msg_received = get_flashed_messages()
+    assert msg_expected in msg_received
+    assert response.status_code == 302
+    assert users_count == User.query.count()
+    assert _user.location == location
+    assert _user.first_name == new_first_name
+    assert _user.last_name == new_last_name
+    assert _user.name == MANAGER['name']
+    assert _user.email == new_email
+    assert _user.role_id == new_role_id

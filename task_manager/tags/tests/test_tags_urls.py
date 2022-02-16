@@ -8,7 +8,8 @@ from flask import url_for, get_flashed_messages
 from flask_login import current_user
 
 from task_manager.tags.models import Tag    # noqa 401
-from task_manager.database.test_sql_data import EXECUTOR, MANAGER
+from task_manager.database.test_sql_data import (
+    EXECUTOR, MANAGER, TAGS)
 
 logger = logging.getLogger(__name__)
 fake = faker.Faker()
@@ -44,16 +45,17 @@ def test_authorized_show_tags_list(app, db_app, client):
     lines = response.data.count(b'</tr')
     assert lines == tags_count
 
-
-def test_unlogged_create_tag(db_app, client):
+@pytest.mark.parametrize('page', ['tags.create_tag',
+                                  'tags.edit_tag'])
+def test_unlogged_get_post_page(db_app, client, page):
     response = client.get(
-        url_for('tags.create_tag'))
+        url_for(page, id=1))
     assert response.status_code == 302
     msg = get_flashed_messages()
     assert msg[0] == 'Please log in to access this page.'
     parsed = urllib.parse.urlparse(response.location)
     assert parsed.path == url_for('users.login')
-    response = client.post(url_for('tags.create_tag'))
+    response = client.post(url_for(page, id=1))
     assert response.status_code == 302
     msg = get_flashed_messages()
     assert msg[0] == 'Please log in to access this page.'
@@ -61,16 +63,18 @@ def test_unlogged_create_tag(db_app, client):
     assert parsed.path == url_for('users.login')
 
 
-def test_unautorized_create_tag(db_app, client):
+@pytest.mark.parametrize('page', ['tags.create_tag',
+                                  'tags.edit_tag'])
+def test_unauthorized_get_post_page(db_app, client, page):
     client.post(url_for('users.login'),
                 data={'email': EXECUTOR['email'],
                       'psw': EXECUTOR['password']})
     assert current_user.is_authenticated
     _ = get_flashed_messages()
     response = client.get(
-        url_for('tags.create_tag'))
+        url_for(page, id=1))
     assert response.status_code == 403
-    response = client.post(url_for('tags.create_tag'))
+    response = client.post(url_for(page, id=1))
     assert response.status_code == 403
 
 
@@ -102,4 +106,44 @@ def test_authorized_create_tag(db_app, client):
     assert msg[0] == f'Tag {NEW_TAG["name"]} created'
 
 
+@pytest.mark.parametrize('tag_detail', TAGS)
+def test_authorised_show_tag_detail(db_app, client, tag_detail):
+    tag = Tag.query.filter_by(name=tag_detail['name']).one()
+    client.post(url_for('users.login'),
+                data={'email': EXECUTOR['email'],
+                      'psw': EXECUTOR['password']})
+    assert current_user.is_authenticated
+    _ = get_flashed_messages()
+    response = client.get(url_for('tags.show_tag_detail', id=tag.id))
+    assert response.status_code == 200
+    assert b'Tag detail' in response.data
+    assert bytes(tag.name, 'utf-8') in response.data
+    assert bytes(tag.description, 'utf-8') in response.data
 
+
+@pytest.mark.parametrize('tag_detail', TAGS)
+def test_authorized_edit_tag_get(db_app, client, tag_detail):
+    tag = Tag.query.filter_by(name=tag_detail['name']).one()
+    client.post(url_for('users.login'),
+                data={'email': MANAGER['email'],
+                      'psw': MANAGER['password']})
+    assert current_user.is_authenticated
+    _ = get_flashed_messages()
+    response = client.get(
+        url_for('tags.edit_tag', id=tag.id))
+    assert response.status_code == 200
+    assert bytes(f'Edit tag #{tag.name}', 'utf-8') in response.data
+    assert bytes(tag.name, 'utf-8') in response.data
+    assert bytes(tag.description, 'utf-8') in response.data
+
+
+@pytest.mark.parametrize('tag_detail', TAGS)
+def test_authorized_edit_tag_post(db_app, client, tag_detail):
+    tag = Tag.query.filter_by(name=tag_detail['name']).one()
+    client.post(url_for('users.login'),
+                data={'email': MANAGER['email'],
+                      'psw': MANAGER['password']})
+    assert current_user.is_authenticated
+    response = client.get(
+        url_for('tags.edit_tag', id=tag.id))
+    assert response.status_code == 200

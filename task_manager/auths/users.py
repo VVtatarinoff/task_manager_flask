@@ -184,6 +184,8 @@ def delete_user(id):
 @self_or_admin_required("You could not edit other user's profile")
 def edit_profile(username):
     user = User.query.filter_by(name=username).first()
+    logger.disabled = False
+    logger.debug(f'User profile update {request.method}, users {user.name}')
     is_admin = current_user.is_administrator()
     if user is None:
         abort(404)
@@ -197,6 +199,7 @@ def edit_profile(username):
         if is_admin:
             user.email = form.email.data
             user.role_id = form.role.data
+            logger.debug(f'User admin update email {user.email}, role {user.role_id}')
         try:
             db.session.add(user)
             db.session.commit()

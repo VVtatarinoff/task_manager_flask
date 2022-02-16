@@ -78,8 +78,8 @@ def show_tag_detail(id):
 
 
 @tags_bp.route('/tag_edit/<int:id>', methods=('POST', 'GET'))
-@permission_required(Permission.MANAGE)
 @login_required
+@permission_required(Permission.MANAGE)
 def edit_tag(id):
     tag = Tag.query.filter_by(id=id).first()
     if tag is None:
