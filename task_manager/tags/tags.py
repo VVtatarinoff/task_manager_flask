@@ -31,7 +31,7 @@ def show_tags_list():
     try:
         tags = Tag.query.all()
     except SQLAlchemyError as e:
-        flash('Database error ', e)
+        flash('Database error ', 'danger')
     context['table_data'] = tags
     return render_template('tags/tag_list.html', **context)
 
@@ -53,7 +53,7 @@ def create_tag():
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
-            flash('Error during adding to DataBase', 'error')
+            flash('Error during adding to DataBase', 'danger')
         else:
             logger.debug(f'tag created {request.form["name"]}')
             flash(f'Tag {request.form["name"]} created', 'success')
@@ -98,9 +98,9 @@ def edit_tag(id):
             db.session.add(tag)
             db.session.commit()
         except SQLAlchemyError:
-            flash(f'{tag.name} could not be updated', 'error')
+            flash(f'{tag.name} could not be updated', 'danger')
         else:
-            flash(f'Details of tag #{tag.name} have been updated.')
+            flash(f'Details of tag #{tag.name} have been updated.', "success")
         return redirect(url_for('tags.show_tag_detail', id=tag.id))
     context['form'] = form
     context['tag'] = tag

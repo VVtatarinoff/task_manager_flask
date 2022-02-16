@@ -38,7 +38,7 @@ def self_or_admin_required(msg):
         def decorated_function(username):
             if (current_user.name != username) and (
                     not current_user.is_administrator()):
-                flash(msg)
+                flash(msg, "warning")
                 return redirect(url_for('main.index'))
             return f(username)
 
@@ -76,7 +76,7 @@ def register():
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
-            flash('Error during adding to DataBase', 'error')
+            flash('Error during adding to DataBase', 'danger')
         else:
             logger.debug(f'user registered {request.form["email"]}')
             flash('User registered', 'success')
@@ -103,7 +103,7 @@ def login():  # noqa 901
         try:
             user = User.query.filter_by(email=request.form['email']).one()
         except SQLAlchemyError:
-            flash('Invalid email or password.', 'error')
+            flash('Invalid email or password.', 'danger')
             logger.debug(f'login no such data in db:'
                          f' email {request.form["email"]} '
                          f'psw {request.form["psw"]}')
@@ -116,12 +116,12 @@ def login():  # noqa 901
             try:
                 db.session.commit()
             except SQLAlchemyError:
-                flash(f'{user.name} could not update bd', 'error')
+                flash(f'{user.name} could not update bd', 'danger')
             previous_page = request.args.get('next')
             if previous_page and previous_page != url_for('users.log_out'):
                 return redirect(previous_page)
             return redirect(url_for('main.index'))
-        flash('Invalid email or password.')
+        flash('Invalid email or password.', 'danger')
     return render_template('users/user_login.html', **context)
 
 
@@ -129,7 +129,7 @@ def login():  # noqa 901
 @login_required
 def log_out():
     logout_user()
-    flash('You have been logged out.')
+    flash('You have been logged out.', 'success')
     return redirect(url_for('main.index'))
 
 
@@ -156,7 +156,7 @@ def get_user_list():
     try:
         users = User.query.filter(User.role_id.in_(checked_id)).all()
     except SQLAlchemyError as e:
-        flash('Database error ', e)
+        flash('Database error ', 'danger')
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
 
@@ -205,9 +205,9 @@ def edit_profile(username):
             db.session.add(user)
             db.session.commit()
         except SQLAlchemyError:
-            flash(f'{user.name} could not be updated', 'error')
+            flash(f'{user.name} could not be updated', 'danger')
         else:
-            flash(f'Profile of {user.name} has been updated.')
+            flash(f'Profile of {user.name} has been updated.', 'success')
         return redirect(url_for('users.show_profile', username=user.name))
     context['form'] = form
     context['user'] = user

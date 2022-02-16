@@ -53,7 +53,10 @@
     </div>
     <div class="col-md-6">
         {% for cat, msg in get_flashed_messages(True) %}
-            <div class = 'flash {{ cat }}'>{{ msg }}</div>
+            <div class = 'alert alert-{{ cat }} alert-dismissable fade show' role="alert">
+                <button class="close" type="button" data-dismiss="alert" aria-label=""close">x</button>
+                {{ msg }}
+            </div>
         {% endfor %}
         {% block content %}
         {% block filter %}

@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from flask import Blueprint, redirect, url_for, request, flash, render_template
+from flask import Blueprint, redirect, url_for, request, flash, render_template, make_response
 from flask_login import login_required
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import load_only
@@ -50,20 +50,11 @@ def show_task_detail(id):
 @login_required
 @permission_required(Permission.MANAGE)
 def create_task():
-    executors = User.query.filter(User.role_id.in_([1,2])).all()
-    executors_list = [(None, '           ')] + \
-                     list(map(lambda x: (x.id, f"{x.first_name} {x.last_name}"), executors))
-    if len(executors_list)<2:
-        flash('No executors or managers in database ', 'error')
-        return redirect(url_for("tasks.show_tasks_list"))
-    tags = Tag.query.all()
-    tags_list = [(None, '           ')]+list(map(lambda x: (x.id, x.name), tags))
-    statuses = Status.query.all()
-    status_list = [(None, '           ')]+list(map(lambda x: (x.id, x.name), statuses))
-    form = CreateTask(executors=executors_list, tags=tags_list, step_names=status_list)
-    if form.add_step:
+    choices = extract_choices()
+    form = CreateTask(**choices)
+    if form.add_step.data:
         if msg := get_error_for_step(form):
-            flash(msg)
+            flash(msg, "warning")
         else:
             pass
     context = dict()
@@ -71,6 +62,19 @@ def create_task():
     context['title'] = 'Create task'
 
     return render_template('tasks/task_creation.html', **context)
+
+
+def extract_choices():
+    choices =dict()
+    executors = User.query.filter(User.role_id.in_([1, 2])).all()
+    choices['executors'] = [(None, '           ')] + \
+                     list(map(lambda x: (x.id, f"{x.first_name} {x.last_name}"), executors))
+    tags = Tag.query.all()
+    choices['tags'] = [(None, '           ')] + list(map(lambda x: (x.id, x.name), tags))
+    statuses = Status.query.all()
+    choices['step_names'] = [(None, '           ')] + list(map(lambda x: (x.id, x.name), statuses))
+    return choices
+
 
 def get_error_for_step(form):
     step_id = form.step_name.data
@@ -86,9 +90,9 @@ def get_error_for_step(form):
     step = list(Status.query.filter_by(id=step_id).all())
     if len(step) == 0:
         return "No such status exists in database"
-    if end > start:
-        return "Start date less than deadline"
-    today = datetime.today()
+    if end < start:
+        return "Start date greater than deadline"
+    today = datetime.date(datetime.today())
     if start < today:
-        return "The start point is in the past"
+        return "The start date is in the past"
     return False
