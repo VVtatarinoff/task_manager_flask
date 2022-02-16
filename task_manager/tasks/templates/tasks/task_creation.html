@@ -31,11 +31,13 @@
             <th scope="col">Deadline</th>
             </thead>
             <tbody>
+            {% for step in steps %}
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td>{{ step.step_name }}</td>
+                <td>{{ step.start }}</td>
+                <td>{{ step.end }}</td>
             </tr>
+            {% endfor %}
             </tbody>
         </table>
         <p>Add steps:</p>

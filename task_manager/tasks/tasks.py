@@ -1,7 +1,7 @@
 import logging
-from datetime import datetime
+from datetime import datetime, date
 
-from flask import Blueprint, redirect, url_for, request, flash, render_template, make_response
+from flask import Blueprint, redirect, url_for, request, flash, render_template, session
 from flask_login import login_required
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import load_only
@@ -51,15 +51,29 @@ def show_task_detail(id):
 @permission_required(Permission.MANAGE)
 def create_task():
     choices = extract_choices()
+    steps = session.get('steps', [])
+    if not request.form and steps:
+        session['steps'] = []
     form = CreateTask(**choices)
     if form.add_step.data:
         if msg := get_error_for_step(form):
             flash(msg, "warning")
         else:
-            pass
+            step_id = int(form.step_name.data)
+            status = Status.query.filter_by(id=step_id).one()
+            step_name = status.name
+            step = {'step_id': step_id,
+                    'step_name': step_name,
+                    'start': form.start_step_date.data.toordinal(),
+                    'end': form.planned_step_end.data.toordinal()}
+            session['steps'] = steps + [step]
+            form.step_name.data = None
+            form.start_step_date.data = form.start_step_date.raw_data = None
+            form.planned_step_end.data = form.planned_step_end.raw_data = None
     context = dict()
     context['form'] = form
     context['title'] = 'Create task'
+    context['steps'] = session['steps']
 
     return render_template('tasks/task_creation.html', **context)
 
@@ -92,7 +106,6 @@ def get_error_for_step(form):
         return "No such status exists in database"
     if end < start:
         return "Start date greater than deadline"
-    today = datetime.date(datetime.today())
-    if start < today:
+    if start < date.today():
         return "The start date is in the past"
     return False
