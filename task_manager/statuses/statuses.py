@@ -67,8 +67,6 @@ def create_status():
 @login_required
 def show_status_detail(id):
     status = Status.query.filter_by(id=id).first_or_404()
-    #if tag is None:
-    #    abort(404)
     context = dict()
     context['title'] = 'Status detail'
     context['status'] = status
@@ -83,11 +81,9 @@ def edit_status(id):
     status = Status.query.filter_by(id=id).first_or_404()
     logger.disabled = False
     logger.debug(f'Status update {request.method}, status {status.name}')
-    #if tag is None:
-    #    abort(404)
     form = EditStatusForm(status)
     context = dict()
-    context['title'] = f'Edit status #{status.name}'
+    context['title'] = f'Edit status {status.name}'
     if form.validate_on_submit():
         status.name = form.name.data
         status.description = form.description.data

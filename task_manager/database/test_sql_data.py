@@ -70,4 +70,18 @@ for i in range(1, TAG_QNTY + 1):
         "INSERT INTO tags (id, name, description, creation_date) "
         f"VALUES ({i}, '{name}', '{description}', '{datetime.utcnow()}')"
     ]
-SQLS = SQL_CLEAR + SQL_ROLES + SQL_USERS + SQL_TAGS
+
+STATUSES = []
+STATUS_QNTY = 6
+SQL_STATUSES = []
+for i in range(1, STATUS_QNTY + 1):
+    name = fake.pystr(min_chars=5, max_chars=20)
+    description = fake.street_address()
+    STATUSES += [{'name': name,
+                  'description': description}]
+    SQL_STATUSES += [
+        "INSERT INTO statuses (id, name, description, creation_date) "
+        f"VALUES ({i}, '{name}', '{description}', '{datetime.utcnow()}')"
+    ]
+
+SQLS = SQL_CLEAR + SQL_ROLES + SQL_USERS + SQL_TAGS + SQL_STATUSES
