@@ -1,13 +1,12 @@
 import logging
 import faker
 
-
 import pytest  # noqa 401
 import urllib
 from flask import url_for, get_flashed_messages
 from flask_login import current_user
 
-from task_manager.tags.models import Tag    # noqa 401
+from task_manager.tags.models import Tag  # noqa 401
 from task_manager.database.test_sql_data import (
     EXECUTOR, MANAGER, TAGS)
 
@@ -19,7 +18,7 @@ NEW_TAG = {'name': fake.pystr(min_chars=5, max_chars=20),
 
 @pytest.mark.parametrize('page', ['tags.show_tags_list',
                                   'tags.show_tag_detail'])
-def test_unlogged_get_pages(app, db_app, client, page):
+def test_unlogged_get_pages(app, db_tag, client, page):
     response = client.get(
         url_for(page, id=1))
     assert response.status_code == 302
@@ -31,7 +30,7 @@ def test_unlogged_get_pages(app, db_app, client, page):
     assert response.status_code == 405
 
 
-def test_authorized_show_tags_list(app, db_app, client):
+def test_authorized_show_tags_list(app, db_tag, client):
     client.post(url_for('users.login'),
                 data={'email': EXECUTOR['email'],
                       'psw': EXECUTOR['password']})
@@ -45,9 +44,10 @@ def test_authorized_show_tags_list(app, db_app, client):
     lines = response.data.count(b'</tr')
     assert lines == tags_count
 
+
 @pytest.mark.parametrize('page', ['tags.create_tag',
                                   'tags.edit_tag'])
-def test_unlogged_get_post_page(db_app, client, page):
+def test_unlogged_get_post_page(db_tag, client, page):
     response = client.get(
         url_for(page, id=1))
     assert response.status_code == 302
@@ -65,7 +65,7 @@ def test_unlogged_get_post_page(db_app, client, page):
 
 @pytest.mark.parametrize('page', ['tags.create_tag',
                                   'tags.edit_tag'])
-def test_unauthorized_get_post_page(db_app, client, page):
+def test_unauthorized_get_post_page(db_tag, client, page):
     client.post(url_for('users.login'),
                 data={'email': EXECUTOR['email'],
                       'psw': EXECUTOR['password']})
@@ -78,7 +78,7 @@ def test_unauthorized_get_post_page(db_app, client, page):
     assert response.status_code == 403
 
 
-def test_authorized_create_tag(db_app, client):
+def test_authorized_create_tag(db_tag, client):
     client.post(url_for('users.login'),
                 data={'email': MANAGER['email'],
                       'psw': MANAGER['password']})
@@ -99,7 +99,7 @@ def test_authorized_create_tag(db_app, client):
     assert new_tag.creation_date
     assert new_tag.description == NEW_TAG['description']
     Tag.query.filter_by(name=NEW_TAG['name']).delete()
-    db_app.session.commit()
+    db_tag.session.commit()
     assert tags_count == Tag.query.count()
     assert response.status_code == 302
     assert parsed.path == url_for('tags.show_tags_list')
@@ -107,7 +107,7 @@ def test_authorized_create_tag(db_app, client):
 
 
 @pytest.mark.parametrize('tag_detail', TAGS)
-def test_authorised_show_tag_detail(db_app, client, tag_detail):
+def test_authorised_show_tag_detail(db_tag, client, tag_detail):
     tag = Tag.query.filter_by(name=tag_detail['name']).one()
     client.post(url_for('users.login'),
                 data={'email': EXECUTOR['email'],
@@ -122,7 +122,7 @@ def test_authorised_show_tag_detail(db_app, client, tag_detail):
 
 
 @pytest.mark.parametrize('tag_detail', TAGS)
-def test_authorized_edit_tag_get(db_app, client, tag_detail):
+def test_authorized_edit_tag_get(db_tag, client, tag_detail):
     tag = Tag.query.filter_by(name=tag_detail['name']).one()
     client.post(url_for('users.login'),
                 data={'email': MANAGER['email'],
@@ -138,7 +138,7 @@ def test_authorized_edit_tag_get(db_app, client, tag_detail):
 
 
 @pytest.mark.parametrize('tag_detail', TAGS)
-def test_authorized_edit_tag_post(db_app, client, tag_detail):
+def test_authorized_edit_tag_post(db_tag, client, tag_detail):
     tag = Tag.query.filter_by(name=tag_detail['name']).one()
     client.post(url_for('users.login'),
                 data={'email': MANAGER['email'],

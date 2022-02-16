@@ -31,16 +31,15 @@ permission_mapping = [
         Permission.ADMINISTER: False}}]
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def app():
     app = create_app('testing')
     with app.app_context():
         yield app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def db_app(app):
-    # db = SQLAlchemy(app)
     with app.app_context():
         migrate = Migrate(app, db)  # noqa 481
         directory = BASE_DIR / 'migrations'

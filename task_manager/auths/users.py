@@ -199,7 +199,8 @@ def edit_profile(username):
         if is_admin:
             user.email = form.email.data
             user.role_id = form.role.data
-            logger.debug(f'User admin update email {user.email}, role {user.role_id}')
+            logger.debug(f'User admin update email {user.email},'
+                         f' role {user.role_id}')
         try:
             db.session.add(user)
             db.session.commit()

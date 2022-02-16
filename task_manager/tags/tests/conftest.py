@@ -14,15 +14,15 @@ CURRENT_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURRENT_DIR.parent.parent
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def app():
     app = create_app('testing')
     with app.app_context():
         yield app
 
 
-@pytest.fixture(scope='session')
-def db_app(app):
+@pytest.fixture(scope='module')
+def db_tag(app):
     with app.app_context():
         migrate = Migrate(app, db)  # noqa 481
         directory = BASE_DIR / 'migrations'

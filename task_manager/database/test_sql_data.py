@@ -28,6 +28,8 @@ NEW_USER = {
     'last_name': fake.last_name(),
     'password': "".join(fake.random_letters(length=10))}
 
+SQL_CLEAR = ["DELETE FROM roles",
+             "DELETE FROM users"]
 SQL_ROLES = [
     "INSERT INTO roles (name, default_flag, permissions) "
     "VALUES ('Executor','True','3')",
@@ -68,4 +70,4 @@ for i in range(1, TAG_QNTY + 1):
         "INSERT INTO tags (id, name, description, creation_date) "
         f"VALUES ({i}, '{name}', '{description}', '{datetime.utcnow()}')"
     ]
-SQLS = SQL_ROLES + SQL_USERS + SQL_TAGS
+SQLS = SQL_CLEAR + SQL_ROLES + SQL_USERS + SQL_TAGS
