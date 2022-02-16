@@ -140,6 +140,7 @@ def test_authorized_edit_tag_get(db_tag, client, tag_detail):
 @pytest.mark.parametrize('tag_detail', TAGS)
 def test_authorized_edit_tag_post(db_tag, client, tag_detail):
     tag = Tag.query.filter_by(name=tag_detail['name']).one()
+    id = tag.id
     client.post(url_for('users.login'),
                 data={'email': MANAGER['email'],
                       'psw': MANAGER['password']})
@@ -147,3 +148,18 @@ def test_authorized_edit_tag_post(db_tag, client, tag_detail):
     response = client.get(
         url_for('tags.edit_tag', id=tag.id))
     assert response.status_code == 200
+    new_name = tag.name[:15] + 'test'
+    new_description = 'test' + tag.description + 'test'
+    tags_count = Tag.query.count()
+    response = client.post(url_for('tags.edit_tag', id=tag.id),
+                           data={'name': new_name,
+                                 'description': new_description},
+                           )
+    assert response.status_code == 302
+    tag = Tag.query.filter_by(id=id).one()
+    msg_expected = f'Details of tag #{tag.name} have been updated.'
+    msg_received = get_flashed_messages()
+    assert msg_expected in msg_received
+    assert tags_count == Tag.query.count()
+    assert tag.name == new_name
+    assert tag.description == new_description

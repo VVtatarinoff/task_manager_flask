@@ -82,6 +82,8 @@ def show_tag_detail(id):
 @permission_required(Permission.MANAGE)
 def edit_tag(id):
     tag = Tag.query.filter_by(id=id).first()
+    logger.disabled = False
+    logger.debug(f'Tag update {request.method}, tag {tag.name}')
     if tag is None:
         abort(404)
     form = EditTagForm(tag)
@@ -90,6 +92,8 @@ def edit_tag(id):
     if form.validate_on_submit():
         tag.name = form.name.data
         tag.description = form.description.data
+        logger.debug(
+            f'Tag update form validated {tag.name}, {tag.description}')
         try:
             db.session.add(tag)
             db.session.commit()
