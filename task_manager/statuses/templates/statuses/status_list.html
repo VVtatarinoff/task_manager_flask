@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% block filter %}
+{% endblock filter %}
+<a class="nav-link" href={{ url_for('statuses.create_status') }}>Create status</a>
+<table class="table table-striped table-bordered table-hover table-sm table-responsive-md">
+    <thead class="table-primary" scope="col">
+        {% for t_head in table_heads %}
+        <th scope="col">{{ t_head }}</th>
+        {% endfor %}
+    </thead>
+    <tbody>
+    {% for status in table_data %}
+        <tr class="">
+
+            <td>{{ status.id }}</td>
+            <td><a href={{ url_for('statuses.show_status_detail', id=status.id) }}> {{ status.name }} </a></td>
+            <td>{{ status.creation_date.strftime('%d-%m-%Y')}}</td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

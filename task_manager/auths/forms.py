@@ -59,7 +59,7 @@ class SignInForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
-    first_name = StringField('First nam: ',
+    first_name = StringField('First name: ',
                              validators=[Length(max=70)])
     last_name = StringField('Last name: ',
                             validators=[Length(max=70)])

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+<h1>{{ status.name }}</h1>
+
+<p> Description:
+
+    <br>
+    {{ status.description }}
+        </a>
+
+</p>
+    <a class="btn btn-default" href="{{ url_for('statuses.edit_status', id=status.id) }}">
+    Edit status
+    </a>
+
+</div>
+
+{% endblock content %}

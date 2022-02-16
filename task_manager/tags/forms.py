@@ -16,7 +16,7 @@ class CreateTag(FlaskForm):
 
 
 class EditTagForm(FlaskForm):
-    name = StringField('Name: ',
+    name = StringField('Name: #',
                        validators=[Length(max=20),
                                    DataRequired(),
                                    Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
