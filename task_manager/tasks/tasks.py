@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 def show_tasks_list():
     logger.disabled = False
     logger.debug(f'Task list request {request.method}, ars {request.args}')
-    logger.debug(f'Task list request, tags = {list(Task.query.all())}')
+    logger.debug(f'Task list request, tasks = {list(Task.query.all())}')
     context = dict()
     context['title'] = 'Tasks'
     context['table_heads'] = ('Name', 'Executor', 'Manager', 'Planned start',

@@ -43,8 +43,8 @@ def create_tasks_list(tasks):
 
 def get_current_status(steps):
     for step in steps:
-        if step['actual_start'] and not step['actual_end_date']:
-            status = Status.query.filter_by(id=step['status_id']).one()
-            status_name = status['name']
+        if step.actual_start and not step.actual_end_date:
+            status = Status.query.filter_by(id=step.status_id).one()
+            status_name = status.name
             return status_name
     return 'No status'
