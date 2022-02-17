@@ -4,6 +4,7 @@ from wtforms import (StringField, SubmitField, SelectField,
 from wtforms.validators import Length, DataRequired, Regexp
 
 
+
 class CreateTask(FlaskForm):
     task_name = StringField('Name: ',
                             validators=[Length(min=4, max=20),
