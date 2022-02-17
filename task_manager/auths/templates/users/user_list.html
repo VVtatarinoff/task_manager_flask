@@ -4,8 +4,10 @@
 {% block filter %}
 
 <div class="card mb-3 bg-secondary">
-    <div class="card-body bg-light>">
-        <form class="form-inline center" method="get" action={{ url_for('users.get_user_list') }}>
+    <div class="card-body ">
+        <form class="" method="get" action={{ url_for('users.get_user_list') }}>
+        <div class="row">
+            <div class="col">
                     <div class="form-group">
                         <div class="mr-3 ml-2">
                             <label class="form-label text-light" for="executor">Show executors</label>
@@ -14,6 +16,8 @@
                             </div>
                         </div>
                     </div>
+            </div>
+            <div class="col">
                     <div class="form-group">
                         <div class="mr-3 ml-2">
                             <label class="form-label text-light" for="manager">Show managers</label>
@@ -22,6 +26,8 @@
                             </div>
                         </div>
                     </div>
+            </div>
+            <div class="col">
                     <div class="form-group">
                         <div class="mr-3 ml-2">
                             <label class="form-label text-light" for="administrator">Show administrators</label>
@@ -30,12 +36,15 @@
                             </div>
                         </div>
                     </div>
+            </div>
+            <div class="col">
                     <div class="form-group">
-                        <div class="mr-3 ml-2">
-                            <input id="submit" name="submit" type="submit" value="Apply">
+                        <div class="mr-3 ml-2 ">
+                            <input class="btn btn-warning" id="submit" name="submit" type="submit" value="Apply">
                         </div>
                     </div>
-
+            </div>
+            </div>
        </form>
     </div>
 </div>

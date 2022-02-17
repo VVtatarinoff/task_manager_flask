@@ -4,14 +4,12 @@
 <div class="card mb-3 bg-light">
     <div class="card-body bg-light>">
         <div class="row" >
-            <div class="mr-3 ml-2 mb-4 mt-2 col-3 text-primary">
-                <h3>Username:</h3>
-                    </div>
-            <div class="mr-3 ml-2 mb-5 col-6 text-primary text-center font-weight-bold">
+            <div class="mr-3 mb-5 pt-3 pt-2 col-12 text-primary text-center font-weight-bold border-bottom">
             <h1>{{ user.name }}</h1>
             </div>
 
             <div class="mr-3 ml-2 mb-3 col-4">
+
                 <h4>Full name:</h4>
             </div>
             <div class="mr-3 ml-2 mb-3 col-6 font-weight-bold text-primary">
@@ -64,7 +62,7 @@
                     {{ user.creation_date.strftime('%d-%m-%Y') }}
                 </h3>
             </div>
-            <div class="mr-3 ml-2 mb-3 col-4">
+            <div class="mr-3 ml-2 mb-3 col-4 ">
                 <h4>
                     Last logged
                 </h4>
@@ -74,7 +72,8 @@
                     {{ moment(user.last_seen).fromNow() }}
                 </h3>
             </div>
-
+            <div class="mr-3 ml-2 col-11 text-secondary  border-bottom">
+            </div>
             <div class="mr-3 ml-2 mb-3 mt-4 col-12 text-center">
                 {% if (user.name == current_user.name) or (current_user.is_administrator()) %}
                 <a class="btn btn-primary" href="{{ url_for('users.edit_profile', username=user.name) }}">

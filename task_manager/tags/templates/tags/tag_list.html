@@ -3,7 +3,7 @@
 
 {% block filter %}
 {% endblock filter %}
-<a class="nav-link" href={{ url_for('tags.create_tag') }}>Create tag</a>
+<button class="nav-link btn btn-primary mb-3" href={{ url_for('tags.create_tag') }}>Create tag</button>
 <table class="table table-striped table-bordered table-hover table-sm table-responsive-md">
     <thead class="table-primary" scope="col">
         {% for t_head in table_heads %}
