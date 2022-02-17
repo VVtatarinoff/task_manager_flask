@@ -9,6 +9,7 @@ class Plan(db.Model):
     __tablename__ = 'plans'
     id = db.Column(db.Integer, primary_key=True)
     start_date = db.Column(db.Date, nullable=False)
+    actual_start = db.Column(db.Date)
     planned_end = db.Column(db.Date, nullable=False)
     actual_end_date = db.Column(db.Date)
     status_id = db.Column(db.Integer, ForeignKey('statuses.id'))
@@ -16,7 +17,7 @@ class Plan(db.Model):
     executor_id = db.Column(db.Integer, ForeignKey('users.id'))
 
 
-class IntermediateTaskPlan(db.Model):
+class IntermediateTaskTag(db.Model):
     __tablename__ = 'intermediate_task_tags'
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.Integer, ForeignKey('tasks.id'))
