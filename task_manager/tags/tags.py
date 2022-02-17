@@ -30,7 +30,7 @@ def show_tags_list():
     tags = []
     try:
         tags = Tag.query.all()
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         flash('Database error ', 'danger')
     context['table_data'] = tags
     return render_template('tags/tag_list.html', **context)

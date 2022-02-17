@@ -29,7 +29,7 @@ def show_statuses_list():
     statuses = []
     try:
         statuses = Status.query.all()
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         flash('Database error ', 'danger')
     context['table_data'] = statuses
     return render_template('statuses/status_list.html', **context)
@@ -95,7 +95,8 @@ def edit_status(id):
         except SQLAlchemyError:
             flash(f'Status {status.name} could not be updated', 'danger')
         else:
-            flash(f'Details of status "{status.name}" have been updated.', "success")
+            flash(f'Details of status "{status.name}" have been updated.',
+                  "success")
         return redirect(url_for('statuses.show_status_detail', id=status.id))
     context['form'] = form
     context['status'] = status

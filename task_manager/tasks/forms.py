@@ -1,18 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, DateField
+from wtforms import (StringField, SubmitField, SelectField,
+                     SelectMultipleField, DateField)
 from wtforms.validators import Length, DataRequired, Regexp
 
 
 class CreateTask(FlaskForm):
     task_name = StringField('Name: ',
-                       validators=[Length(min=4, max=20),
-                                   DataRequired(),
-                                   Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
-                                          'Name must have only letters, '
-                                          'numbers, dots or underscores')])
+                            validators=[Length(min=4, max=20),
+                                        DataRequired(),
+                                        Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
+                                               'Name must have only letters, '
+                                               'numbers, dots or underscores')])
     description = StringField('Description: ',
                               validators=[Length(max=200),
-                                          DataRequired(),])
+                                          DataRequired(), ])
     executor = SelectField('Executor ', validators=[DataRequired()])
     tags = SelectMultipleField('Tags ')
     submit = SubmitField('Create')
@@ -23,13 +24,11 @@ class CreateTask(FlaskForm):
     del_step = SubmitField('X')
     del_option = SelectField('choice to delete')
 
-    def __init__(self, executors=[], tags=[], step_names=[], qnty_steps=0, *args, **kwargs):
+    def __init__(self, executors=[], tags=[], step_names=[], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.executor.choices = executors
         self.tags.choices = tags
         self.step_name.choices = step_names
-        #self.del_option.choices = [x for x in range(qnty_steps)]
-
 
 
 class EditTaskForm(FlaskForm):

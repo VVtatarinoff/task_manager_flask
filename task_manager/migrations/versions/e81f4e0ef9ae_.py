@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: bca4d7ed7f8e
+Revision ID: e81f4e0ef9ae
 Revises: 
-Create Date: 2022-02-15 19:03:06.627151
+Create Date: 2022-02-17 16:10:21.354860
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bca4d7ed7f8e'
+revision = 'e81f4e0ef9ae'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -53,7 +53,7 @@ def upgrade():
     sa.Column('creation_date', sa.DateTime(), nullable=True),
     sa.Column('password_hash', sa.String(length=200), nullable=False),
     sa.Column('last_seen', sa.DateTime(), nullable=True),
-    sa.Column('role_id', sa.Integer(), nullable=True),
+    sa.Column('role_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
@@ -68,7 +68,7 @@ def upgrade():
     sa.Column('executor_id', sa.Integer(), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
     sa.Column('planned_end_date', sa.Date(), nullable=False),
-    sa.Column('actual_end_date', sa.Date(), nullable=False),
+    sa.Column('actual_end_date', sa.Date(), nullable=True),
     sa.Column('post_to_review', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['executor_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['manager_id'], ['users.id'], ),
@@ -86,6 +86,7 @@ def upgrade():
     op.create_table('plans',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
+    sa.Column('actual_start', sa.Date(), nullable=True),
     sa.Column('planned_end', sa.Date(), nullable=False),
     sa.Column('actual_end_date', sa.Date(), nullable=True),
     sa.Column('status_id', sa.Integer(), nullable=True),

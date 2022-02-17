@@ -155,7 +155,7 @@ def get_user_list():
 
     try:
         users = User.query.filter(User.role_id.in_(checked_id)).all()
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         flash('Database error ', 'danger')
     context['table_data'] = users
     return render_template('users/user_list.html', **context)
@@ -164,9 +164,7 @@ def get_user_list():
 @users_bp.route('/profile/<string:username>')
 @login_required
 def show_profile(username):
-    user = User.query.filter_by(name=username).first()
-    if user is None:
-        abort(404)
+    user = User.query.filter_by(name=username).first_or_404()
     context = dict()
     context['title'] = 'User profile'
     context['user'] = user
@@ -183,12 +181,10 @@ def delete_user(id):
 @login_required
 @self_or_admin_required("You could not edit other user's profile")
 def edit_profile(username):
-    user = User.query.filter_by(name=username).first()
+    user = User.query.filter_by(name=username).first_or_404()
     logger.disabled = False
     logger.debug(f'User profile update {request.method}, users {user.name}')
     is_admin = current_user.is_administrator()
-    if user is None:
-        abort(404)
     form = EditProfileFormAdmin(user) if is_admin else EditProfileForm(user)
     context = dict()
     context['title'] = f'Edit profile of {user.name}'

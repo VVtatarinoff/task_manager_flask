@@ -1,20 +1,20 @@
 import logging
-from datetime import datetime, date
+from datetime import date
 
-from flask import Blueprint, redirect, url_for, request, flash, render_template, session
+from flask import (Blueprint, redirect, url_for, request,
+                   flash, render_template, session)
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import load_only
 
 from task_manager.statuses.models import Status
 from task_manager.tags.models import Tag
-from task_manager.tasks.forms import CreateTask, EditTaskForm
+from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Task, Plan, IntermediateTaskTag
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 
 from task_manager import db  # noqa 402
-from task_manager.auths.models import User, Permission, Role  # noqa 402
+from task_manager.auths.models import User, Permission  # noqa 402
 from task_manager.auths.users import permission_required  # noqa 402
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def show_task_detail(id):
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
-def create_task():
+def create_task():  # noqa 901
     choices = extract_choices()
 
     if not request.form:
@@ -85,7 +85,7 @@ def create_task():
     if form.submit.data:
         if msg := get_error_create_form(form, steps):
             flash(msg, "warning")
-        elif create_task(form, normalize_steps_set(session['steps'])):
+        elif upload_task(form, normalize_steps_set(session['steps'])):
             flash('Task successfully created', 'success')
             return redirect(url_for('tasks.show_tasks_list'))
         else:
@@ -98,7 +98,7 @@ def create_task():
     return render_template('tasks/task_creation.html', **context)
 
 
-def create_task(form, steps):
+def upload_task(form, steps):
     manager_id = current_user.id
     executor_id = form.executor.data
     task_name = form.task_name.data
@@ -126,7 +126,7 @@ def create_task(form, steps):
             )
             db.session.add(interlink)
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError:
         db.session.rollback()
         return False
     return True
@@ -135,12 +135,15 @@ def create_task(form, steps):
 def extract_choices():
     choices = dict()
     executors = User.query.filter(User.role_id.in_([1, 2])).all()
-    choices['executors'] = [(None, '   <------>     ')] + \
-                           list(map(lambda x: (x.id, f"{x.first_name} {x.last_name}"), executors))
+    choices['executors'] = [(None, '   <------>     ')] + list(
+        map(lambda x: (x.id, f"{x.first_name} {x.last_name}"),
+            executors))
     tags = Tag.query.all()
-    choices['tags'] = [(None, '   <------>     ')] + list(map(lambda x: (x.id, x.name), tags))
+    choices['tags'] = [(None, '   <------>     ')] + list(
+        map(lambda x: (x.id, x.name), tags))
     statuses = Status.query.all()
-    choices['step_names'] = [(None, '   <------>     ')] + list(map(lambda x: (x.id, x.name), statuses))
+    choices['step_names'] = [(None, '   <------>     ')] + list(
+        map(lambda x: (x.id, x.name), statuses))
     return choices
 
 
@@ -156,7 +159,7 @@ def get_error_create_form(form, steps):
     return False
 
 
-def get_error_for_step_add(form):
+def get_error_for_step_add(form):   # noqa 162
     step_id = form.step_name.data
     start = form.start_step_date.data
     end = form.planned_step_end.data
@@ -186,8 +189,7 @@ def normalize_steps_set(steps):
                         'step_name': step['step_name'],
                         'start': date.fromordinal(step['start']),
                         'end': date.fromordinal(step['end'])}]
-    key = lambda x: x['start']
-    normalized.sort(key=key)
+    normalized.sort(key=lambda x: x['start'])
     return normalized
 
 
