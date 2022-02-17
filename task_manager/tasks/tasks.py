@@ -51,18 +51,20 @@ def show_task_detail(id):
 @permission_required(Permission.MANAGE)
 def create_task():
     choices = extract_choices()
-    steps = session.get('steps', [])
-    if not request.form and steps:
+
+    if not request.form:
         session['steps'] = []
-    form = CreateTask(**choices)
+    steps = session.get('steps', [])
+    form = CreateTask(qnty_steps=len(steps), **choices)
     if form.add_step.data:
-        if msg := get_error_for_step(form):
+        if msg := get_error_for_step_add(form):
             flash(msg, "warning")
         else:
             step_id = int(form.step_name.data)
             status = Status.query.filter_by(id=step_id).one()
             step_name = status.name
-            step = {'step_id': step_id,
+            step = {'id': len(steps),
+                   'step_id': step_id,
                     'step_name': step_name,
                     'start': form.start_step_date.data.toordinal(),
                     'end': form.planned_step_end.data.toordinal()}
@@ -70,27 +72,37 @@ def create_task():
             form.step_name.data = None
             form.start_step_date.data = form.start_step_date.raw_data = None
             form.planned_step_end.data = form.planned_step_end.raw_data = None
+    if form.del_step.data:
+        if msg := get_error_for_step_delete(form):
+            flash(msg, "warning")
+        else:
+            new_steps = []
+            for step in steps:
+                if str(step['id']) not in form.del_option.raw_data:
+                    new_steps.append(step)
+            form.del_option.raw_data =[]
+            session['steps'] = new_steps
     context = dict()
     context['form'] = form
     context['title'] = 'Create task'
-    context['steps'] = session['steps']
+    context['steps'] = normalize_steps_set(session['steps'])
 
     return render_template('tasks/task_creation.html', **context)
 
 
 def extract_choices():
-    choices =dict()
+    choices = dict()
     executors = User.query.filter(User.role_id.in_([1, 2])).all()
-    choices['executors'] = [(None, '           ')] + \
-                     list(map(lambda x: (x.id, f"{x.first_name} {x.last_name}"), executors))
+    choices['executors'] = [(None, '   <------>     ')] + \
+                           list(map(lambda x: (x.id, f"{x.first_name} {x.last_name}"), executors))
     tags = Tag.query.all()
-    choices['tags'] = [(None, '           ')] + list(map(lambda x: (x.id, x.name), tags))
+    choices['tags'] = [(None, '   <------>     ')] + list(map(lambda x: (x.id, x.name), tags))
     statuses = Status.query.all()
-    choices['step_names'] = [(None, '           ')] + list(map(lambda x: (x.id, x.name), statuses))
+    choices['step_names'] = [(None, '   <------>     ')] + list(map(lambda x: (x.id, x.name), statuses))
     return choices
 
 
-def get_error_for_step(form):
+def get_error_for_step_add(form):
     step_id = form.step_name.data
     start = form.start_step_date.data
     end = form.planned_step_end.data
@@ -109,3 +121,23 @@ def get_error_for_step(form):
     if start < date.today():
         return "The start date is in the past"
     return False
+
+
+def normalize_steps_set(steps):
+    normalized = []
+
+    for step in steps:
+        normalized += [{'id': int(step['id']),
+                       'step_id': int(step['step_id']),
+                        'step_name': step['step_name'],
+                        'start': date.fromordinal(step['start']),
+                        'end': date.fromordinal(step['end'])}]
+    key = lambda x: x['start']
+    normalized.sort(key=key)
+    return normalized
+
+def get_error_for_step_delete(form):
+    choices = form.del_option.raw_data
+    if not choices:
+        return "Select steps to delete"
+

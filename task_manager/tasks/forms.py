@@ -20,12 +20,15 @@ class CreateTask(FlaskForm):
     start_step_date = DateField('Start date')
     planned_step_end = DateField('Deadline')
     add_step = SubmitField('Add step')
+    del_step = SubmitField('X')
+    del_option = SelectField('choice to delete')
 
-    def __init__(self, executors=[], tags=[], step_names=[], *args, **kwargs):
+    def __init__(self, executors=[], tags=[], step_names=[], qnty_steps=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.executor.choices = executors
         self.tags.choices = tags
         self.step_name.choices = step_names
+        #self.del_option.choices = [x for x in range(qnty_steps)]
 
 
 
