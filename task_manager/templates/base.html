@@ -32,8 +32,13 @@
         </li>
     </ul>
     {% if current_user.is_authenticated %}
-        <p class="ml-md-mt-3 font-weight-bold pr-3 pt-2">{{ current_user.name }}</p>
-        <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.log_out') }}>Logout</a>
+    <span class="ml-md-mr-3 mt-2 text-warning pr-1 pt-1">
+        User logged:
+        </span>
+    <h4  class="ml-3 md-mt-3 mr-5 text-white pr-1 pt-3 font-weight-bold">
+    {{ current_user.name }}
+    </h4>
+        <a type="button" class="btn btn-outline-warning ml-5 md-3 font-weight-bold pr-3" href={{ url_for('users.log_out') }}>Logout</a>
     {% else %}
         <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.login') }}>Login</a>
         <a type="button" class="btn btn-outline-warning ml-md-3 font-weight-bold pr-3" href={{ url_for('users.register') }}>Register</a>
@@ -43,7 +48,7 @@
 <div class="row justify-content-md-center align-items-center">
     <div class="col-md-2">
         {% block title %}
-         <h1 class="my-4">{{ title }}</h1>
+         <h1 class="my-4 text-primary font-weight-bold ">{{ title }}</h1>
         {% endblock title %}
     </div>
 </div>

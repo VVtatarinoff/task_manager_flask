@@ -1,35 +1,89 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="page-header">
-<h1>{{ user.name }}</h1>
+<div class="card mb-3 bg-light">
+    <div class="card-body bg-light>">
+        <div class="row" >
+            <div class="mr-3 ml-2 mb-4 mt-2 col-3 text-primary">
+                <h3>Username:</h3>
+                    </div>
+            <div class="mr-3 ml-2 mb-5 col-6 text-primary text-center font-weight-bold">
+            <h1>{{ user.name }}</h1>
+            </div>
 
-<p> Full name:
-    {% if user.first_name %}{{ user.first_name }}{% endif %}
-    {% if user.last_name %}{{ user.last_name }}{% endif %}
-    <br>
-    {% if user.location %}
-        From <a href="http://maps.google.com/?q={{ user.location }}">
-            {{ user.location }}
-        </a>
-    {% endif %}
-</p>
+            <div class="mr-3 ml-2 mb-3 col-4">
+                <h4>Full name:</h4>
+            </div>
+            <div class="mr-3 ml-2 mb-3 col-6 font-weight-bold text-primary">
+                <h3>{% if user.first_name %}{{ user.first_name }}{% endif %}
+                    {% if user.last_name %}{{ user.last_name }}{% endif %}
+                </h3>
+            </div>
+            {% if user.location %}
+            <div class="mr-3 ml-2 mb-3 col-4">
+                <h4>From</h4>
+            </div>
+            <div class="mr-3 ml-2 mb-3 col-6">
+                <h3>
+                    <a href="http://maps.google.com/?q={{ user.location }}">
+                        {{ user.location }}
+                    </a>
+                </h3>
+            </div>
+            {% endif %}
 
 
-<p>E-mail: <a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
+            <div class="mr-3 ml-2 mb-3 col-4">
+                <h4>
+                    E-mail:
+                </h4>
+            </div>
+             <div class="mr-3 ml-2 mb-3 col-6">
+                <h3>
+                    <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                </h3>
+            </div>
 
+            <div class="mr-3 ml-2 mb-3 col-4">
+                <h4>
+                    Role:
+                </h4>
+            </div>
+            <div class="mr-3 ml-2 mb-3 col-6 text-secondary">
+                <h3>
+                    {{ user.role.name }}
+                </h3>
+            </div>
+            <div class="mr-3 ml-2 mb-3 col-4">
+                <h4>
+                    Member since
+                </h4>
+            </div>
+            <div class="mr-3 ml-2 mb-3 col-6 text-secondary">
+                <h3>
+                    {{ user.creation_date.strftime('%d-%m-%Y') }}
+                </h3>
+            </div>
+            <div class="mr-3 ml-2 mb-3 col-4">
+                <h4>
+                    Last logged
+                </h4>
+            </div>
+            <div class="mr-3 ml-2 mb-3 col-6 text-secondary">
+                <h3>
+                    {{ moment(user.last_seen).fromNow() }}
+                </h3>
+            </div>
 
-<p>
-    Role: {{ user.role.name }}
-    <br>
-Member since {{ moment(user.creation_date).format('L') }}.
-Last logged {{ moment(user.last_seen).fromNow() }}.
-</p>
-    {% if (user.name == current_user.name) or (current_user.is_administrator()) %}
-    <a class="btn btn-default" href="{{ url_for('users.edit_profile', username=user.name) }}">
-    Edit Profile
-    </a>
-{% endif %}
+            <div class="mr-3 ml-2 mb-3 mt-4 col-12 text-center">
+                {% if (user.name == current_user.name) or (current_user.is_administrator()) %}
+                <a class="btn btn-primary" href="{{ url_for('users.edit_profile', username=user.name) }}">
+                Edit Profile
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock content %}
