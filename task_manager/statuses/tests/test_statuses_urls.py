@@ -7,7 +7,7 @@ from flask import url_for, get_flashed_messages
 from flask_login import current_user
 
 from task_manager.statuses.models import Status
-from task_manager.database.test_sql_data import (
+from task_manager.database.development_sql_fill import (
     EXECUTOR, MANAGER, STATUSES)
 
 logger = logging.getLogger(__name__)

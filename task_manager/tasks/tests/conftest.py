@@ -22,7 +22,7 @@ def app():
 
 
 @pytest.fixture(scope='module')
-def db_status(app):
+def db_task(app):
     with app.app_context():
         migrate = Migrate(app, db)  # noqa 481
         directory = BASE_DIR / 'migrations'

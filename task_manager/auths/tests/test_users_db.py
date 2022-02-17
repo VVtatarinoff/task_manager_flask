@@ -6,7 +6,7 @@ from flask import url_for, get_flashed_messages
 from flask_login import current_user, login_user
 
 from task_manager.auths.models import User
-from task_manager.database.test_sql_data import (
+from task_manager.database.development_sql_fill import (
     ADMINISTRATOR, EXECUTOR, MANAGER)
 from task_manager.auths.users import (
     permission_required, self_or_admin_required)
