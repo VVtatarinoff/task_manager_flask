@@ -4,7 +4,14 @@ install:
 tests:
 	poetry run pytest -vv
 
+db_init:
+	flask db init --directory task_manager/migrations
 
+migrate:
+	flask db migrate --directory task_manager/migrations
+
+upgrade:
+	flask db upgrade --directory task_manager/migrations
 coverage:
 	poetry run pytest --cov=task_manager
 

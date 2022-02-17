@@ -10,6 +10,7 @@ from task_manager.statuses.models import Status
 from task_manager.tags.models import Tag
 from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Task, Plan, IntermediateTaskTag
+from task_manager.tasks.utils import create_tasks_list
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 
@@ -28,15 +29,15 @@ def show_tasks_list():
     logger.debug(f'Task list request, tags = {list(Task.query.all())}')
     context = dict()
     context['title'] = 'Tasks'
-    context['table_heads'] = ('ID', 'Name', 'Executor', 'Manager',
-                              'Start_date', 'Planned end', 'Actual end',
-                              'Current status', 'Creation date')
-    tasks = []
+    context['table_heads'] = ('Name', 'Executor', 'Manager', 'Planned start',
+                              'Actual start', 'Planned end', 'Actual end',
+                              'Current status')
     try:
         tasks = Task.query.all()
     except SQLAlchemyError as e:
         flash('Database error ', e)
-    context['table_data'] = tasks
+        return redirect(url_for('main.index'))
+    context['table_data'] = create_tasks_list(tasks)
     return render_template('tasks/task_list.html', **context)
 
 

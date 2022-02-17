@@ -37,6 +37,7 @@ class Task(db.Model):
     manager_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
     executor_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
     start_date = db.Column(db.Date, default=date.today, nullable=False)
+    actual_start_date = db.Column(db.Date)
     planned_end_date = db.Column(db.Date, nullable=False)
     actual_end_date = db.Column(db.Date)
     post_to_review = db.Column(db.Boolean, default=False, nullable=False)
