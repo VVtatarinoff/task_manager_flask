@@ -30,7 +30,7 @@
             <th scope="col" class='text-center'>Start date</th>
             <th scope="col" class='text-center'>Deadline</th>
             <th scope="col" class='text-center text-danger'>
-                <input class='text-center text-danger' id="del_step" name="del_step" type="submit" value="Delete checked" >
+
             </th>
             </thead>
             <tbody>
@@ -49,7 +49,7 @@
         </table>
         <h4 class="text-center col-5 text-primary"><strong>Add steps</strong>:</h4>
         <div class="row" method="post">
-            <div class="form-group col-5">
+            <div class="form-group col-4">
                 <div class="mr-3 ml-2">
                     {{ form.step_name.label(class="form-label text-primary") }}
                     {{ form.step_name(class='form-control')}}
@@ -72,7 +72,14 @@
 
             <div class="form-group col-auto">
                 <div class="mr-3 mt-4 ml-2">
-                {{ form.add_step(class='btn btn-secondary') }}
+                {{ form.add_step(class='btn btn-outline-primary') }}
+                </div>
+            </div>
+            <div class="form-group col-auto">
+                <div class="mr-3 mt-4 ml-2">
+                {% if steps %}
+                <input class='text-center btn btn-light btn-outline-danger' id="del_step" name="del_step" type="submit" value="Delete checked" >
+                {% endif %}
                 </div>
             </div>
 

@@ -5,7 +5,7 @@ from wtforms.validators import Length, DataRequired, Regexp
 
 class CreateTask(FlaskForm):
     task_name = StringField('Name: ',
-                       validators=[Length(max=20),
+                       validators=[Length(min=4, max=20),
                                    DataRequired(),
                                    Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
                                           'Name must have only letters, '

@@ -37,7 +37,7 @@ class Task(db.Model):
     executor_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
     start_date = db.Column(db.Date, default=date.today, nullable=False)
     planned_end_date = db.Column(db.Date, nullable=False)
-    actual_end_date = db.Column(db.Date, nullable=False)
+    actual_end_date = db.Column(db.Date)
     post_to_review = db.Column(db.Boolean, default=False, nullable=False)
 
     tags = db.relationship('Tag', backref='task', secondary=association_table)

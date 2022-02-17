@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, date
 
 from flask import Blueprint, redirect, url_for, request, flash, render_template, session
-from flask_login import login_required
+from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import load_only
 
@@ -82,12 +82,39 @@ def create_task():
                     new_steps.append(step)
             form.del_option.raw_data =[]
             session['steps'] = new_steps
+    if form.submit.data:
+        if msg := get_error_create_form(form, steps):
+            flash(msg, "warning")
+        else:
+            new_task = create_task(form, normalize_steps_set(session['steps']))
     context = dict()
     context['form'] = form
     context['title'] = 'Create task'
     context['steps'] = normalize_steps_set(session['steps'])
 
     return render_template('tasks/task_creation.html', **context)
+
+
+def create_task(form, steps):
+    manager_id = current_user.id
+    executor_id = form.executor.data
+    task_name = form.task_name.data
+    task_description = form.description.data
+    task_start = sorted(list(map(lambda x: x['start'], steps)))[0]
+    task_planned_end = sorted(list(map(lambda x: x['end'], steps)))[0]
+    task = Task(name=task_name, description=task_description,
+                manager_id=manager_id, executor_id=executor_id,
+                start_date=task_start,  planned_end_date=task_planned_end)
+    try:
+        db.session.add(task)
+        db.session.flush()
+        id = task.id
+    except Exception as e:
+        db.session.rollback()
+    else:
+        db.session.rollback()
+    plan=0
+
 
 
 def extract_choices():
@@ -100,6 +127,18 @@ def extract_choices():
     statuses = Status.query.all()
     choices['step_names'] = [(None, '   <------>     ')] + list(map(lambda x: (x.id, x.name), statuses))
     return choices
+
+
+def get_error_create_form(form, steps):
+    if not steps:
+        return "Provide a plan for task"
+    if form.executor.data == 'None':
+        return "Nominate an executor"
+    if len(form.task_name.data) < 4:
+        return "Name of task should be at least 4 characters"
+    if len(list(Task.query.filter_by(name=form.task_name.data).all()))>0:
+        return "Task with such name exists in database"
+    return False
 
 
 def get_error_for_step_add(form):
@@ -136,8 +175,10 @@ def normalize_steps_set(steps):
     normalized.sort(key=key)
     return normalized
 
+
 def get_error_for_step_delete(form):
     choices = form.del_option.raw_data
     if not choices:
         return "Select steps to delete"
+    return False
 
