@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager import db
 from task_manager.statuses.models import Status
-from task_manager.tasks.forms import CreateTask
+from task_manager.tasks.forms import CreateTask, EditTaskForm
 from task_manager.tasks.models import Task
 from task_manager.tasks.utils import (create_tasks_list,
                                       upload_task,
@@ -58,7 +58,29 @@ def show_task_detail(id):
 @login_required
 @permission_required(Permission.MANAGE)
 def update_task(id):
-    return redirect(url_for('main.index'))
+    task = Task.query.filter_by(id=id).one()
+    if task.manager_user != current_user and not current_user.is_administrator():
+        flash("Only owner of the task could change it", 'warning')
+        return redirect(url_for("tasks.show_task_detail", id=id))
+    if not request.form:
+        session['tags'] = []
+        steps = []
+        for step in task.plan:
+            step_dict = dict()
+            step_dict['id'] = step.id
+            step_dict['step_id'] = step.status.id
+            step_dict['step_name'] = step.status.name
+            step_dict['start'] = step.start_date.toordinal()
+            step_dict['end'] = step.planned_end.toordinal()
+            steps += [step_dict]
+        session['steps'] = steps
+    form = EditTaskForm(task)
+    context = dict()
+    context['form'] = form
+    context['title'] = 'Change task'
+    context['steps'] = normalize_steps_set(session['steps'])
+
+    return render_template('tasks/task_update.html', **context)
 
 
 @tasks_bp.route('/task_delete/<int:id>', methods=['GET', 'POST'])
@@ -70,7 +92,7 @@ def delete_task(id):
     if task.actual_end_date:
         msg = "Could not delete the finished task"
     if task.manager_user != current_user and not current_user.is_administrator():
-        msg = "Only owner of task could delete the it"
+        msg = "Only owner of the task could delete it"
     if msg:
         flash(msg, "danger")
         return redirect(url_for("tasks.show_task_detail", id=id))

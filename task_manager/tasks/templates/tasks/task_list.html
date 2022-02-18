@@ -20,22 +20,22 @@
             <td>{%if task.planned_start %}
                     {{ task.planned_start.strftime('%d-%m-%Y')}}
                 {% else %}
-                    None
+                    no info
                 {% endif %}</td>
             <td>{%if task.actual_start_date %}
                     {{ task.actual_start_date.strftime('%d-%m-%Y')}}
                 {% else %}
-                    None
+
                 {% endif %}</td>
             <td>{%if task.planned_end %}
                     {{ task.planned_end.strftime('%d-%m-%Y')}}
                 {% else %}
-                    None
+                    no info
                 {% endif %}</td>
             <td>{%if task.actual_end_date %}
                     {{ task.actual_end_date.strftime('%d-%m-%Y')}}
                 {% else %}
-                    None
+
                 {% endif %}</td>
             <td>{{ task.status}}</td>
         </tr>

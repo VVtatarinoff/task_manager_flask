@@ -1,5 +1,6 @@
 from datetime import date
 
+from flask import session
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, SelectField,
                      SelectMultipleField, DateField)
@@ -126,19 +127,14 @@ class CreateTask(TaskBody, StepTask):
     pass
 
 
-class EditTaskForm(FlaskForm):
-    name = StringField('Name: #',
-                       validators=[Length(max=20),
-                                   DataRequired(),
-                                   Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
-                                          'Name must have only letters, '
-                                          'numbers, dots or underscores')])
-    description = StringField('Description: ',
-                              validators=[Length(max=200)])
-    submit = SubmitField('Submit')
-
+class EditTaskForm(TaskBody, StepTask):
     def __init__(self, task, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.name.data = self.name.data or task.name
+        self.task_name.data = self.task_name.data or task.name
         self.description.data = self.description.data or task.description
-        self.task = task
+        self.executor.data = self.executor.data or str(task.executor_id)
+        self.submit.label.text = "Change"
+        if not (tags := session.get('tags', None)):
+            tags = list(map(lambda x: str(x.id), task.tags))
+            session['tags'] = tags
+        self.tags.data = self.tags.data or tags
