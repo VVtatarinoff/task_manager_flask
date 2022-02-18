@@ -10,12 +10,11 @@ from task_manager.statuses.models import Status
 from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Task, Plan, IntermediateTaskTag
 from task_manager.tasks.utils import create_tasks_list
+from task_manager.auths.models import Permission
+from task_manager.auths.users import permission_required
+from task_manager import db
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
-
-from task_manager import db
-from task_manager.auths.models import Permission
-from task_manager.auths.users import permission_required  # noqa 402
 
 logger = logging.getLogger(__name__)
 
@@ -76,9 +75,9 @@ def create_task():  # noqa 901
                 new_steps.append(step)
         form.del_option.raw_data = []
         session['steps'] = new_steps
-    if form.submit.data:
-        if msg := get_error_create_form(form, steps):
-            flash(msg, "warning")
+    if form.submit.data and form.check_create_task_form(new=True):
+        if not steps:
+            flash("Provide a plan for task", 'danger')
         elif upload_task(form, normalize_steps_set(session['steps'])):
             flash('Task successfully created', 'success')
             return redirect(url_for('tasks.show_tasks_list'))
@@ -129,12 +128,6 @@ def upload_task(form, steps):
 def get_error_create_form(form, steps):
     if not steps:
         return "Provide a plan for task"
-    if form.executor.data == 'None':
-        return "Nominate an executor"
-    if len(form.task_name.data) < 4:
-        return "Name of task should be at least 4 characters"
-    if len(list(Task.query.filter_by(name=form.task_name.data).all())) > 0:
-        return "Task with such name exists in database"
     return False
 
 

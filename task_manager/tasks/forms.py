@@ -3,11 +3,13 @@ from datetime import date
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, SelectField,
                      SelectMultipleField, DateField)
-from wtforms.validators import Length, DataRequired, Regexp, ValidationError, InputRequired
+from wtforms.validators import (Length, DataRequired,
+                                Regexp, ValidationError)
 
 from task_manager.auths.models import User
 from task_manager.statuses.models import Status
 from task_manager.tags.models import Tag
+from task_manager.tasks.models import Task
 
 
 def check_data_not_in_past():
@@ -30,7 +32,6 @@ def check_selected(msg):
 
 
 def check_not_empty(msg=''):
-
     def _is_empty(form, field):
         if not field.data:
             raise ValidationError(msg)
@@ -44,9 +45,9 @@ class StepTask(FlaskForm):
     start_step_date = DateField('Start date',
                                 validators=[
                                     check_data_not_in_past()])
-    planned_step_end = DateField('Deadline',
-                                 validators=[
-                                             check_data_not_in_past()])
+    planned_step_end = DateField(
+        'Deadline',
+        validators=[check_data_not_in_past()])
     add_step = SubmitField('Add step')
     del_step = SubmitField('X')
     del_option = SelectField('choice to delete')
@@ -73,12 +74,12 @@ class StepTask(FlaskForm):
                 self.planned_step_end.data < self.start_step_date.data):
             success = False
             self.start_step_date.errors = list(
-                *self.start_step_date.errors) + [
-                "Start date greater than deadline"]
+                *self.start_step_date.errors
+            ) + ["Start date greater than deadline"]
         return success
 
     def clear_step_data(self):
-        self.step_name.data=""
+        self.step_name.data = ""
         self.start_step_date.data = self.start_step_date.raw_data = None
         self.planned_step_end.data = self.planned_step_end.raw_data = None
 
@@ -93,7 +94,8 @@ class TaskBody(FlaskForm):
     description = StringField('Description: ',
                               validators=[Length(max=200),
                                           DataRequired(), ])
-    executor = SelectField('Executor ', validators=[DataRequired()])
+    executor = SelectField('Executor ', validators=[
+        check_selected("Nominate an executor")])
     tags = SelectMultipleField('Tags ')
     submit = SubmitField('Create')
 
@@ -107,6 +109,17 @@ class TaskBody(FlaskForm):
         self.tags.choices = [(None, '   <------>     ')] + list(
             map(lambda x: (x.id, x.name), tags))
 
+    def check_create_task_form(self, new=False):
+        fields = [self.task_name, self.description, self.executor, self.tags]
+        success = True
+        for field in fields:
+            success = success and field.validate(self)
+        if success and new and list(
+                Task.query.filter_by(name=self.task_name.data).all()):
+            self.task_name.data.errors = [
+                "Task with such name exists in database"]
+            success = False
+        return success
 
 
 class CreateTask(TaskBody, StepTask):

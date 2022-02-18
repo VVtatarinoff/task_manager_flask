@@ -5,7 +5,6 @@ from pathlib import Path
 from flask_migrate import upgrade, Migrate
 
 from task_manager import create_app, db
-import task_manager.database.development_sql_fill as fill
 
 CURRENT_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURRENT_DIR.parent

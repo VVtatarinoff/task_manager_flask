@@ -1,5 +1,4 @@
 import logging
-import faker
 
 import pytest  # noqa 401
 import urllib
@@ -8,7 +7,7 @@ from flask_login import current_user
 
 from task_manager.tasks.models import Task, Plan  # noqa 401
 from task_manager.database.development_sql_fill import (
-    EXECUTOR, MANAGER, )
+    EXECUTOR)
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +38,3 @@ def test_show_task_list_authorized(app, db_task, client):
     tasks_count = Task.query.count()
     lines = response.data.count(b'</tr')
     assert lines == tasks_count
-
-
-

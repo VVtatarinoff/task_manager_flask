@@ -1,5 +1,5 @@
 from werkzeug.security import generate_password_hash
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
 ADMINISTRATOR = {
     'email': 'vova@mail.ru',
@@ -97,21 +97,23 @@ TASK = [{'i': 1, 'name': 'first_task',
              datetime.today() + timedelta(days=10),
          'post_to_review': 0, 'actual_start': f"'{str(datetime.today())}'",
          'actual_end': None},
-         {'i': 3, 'name': 'third_task',
+        {'i': 3, 'name': 'third_task',
          'description': 'third task in database - testing',
          'manager_id': 2, 'executor_id': 2,
          'start_date': datetime.today() - timedelta(days=5),
          'planned_end_date':
              datetime.today() - timedelta(days=1),
-         'post_to_review': 0, 'actual_start': f"'{str(datetime.today() - timedelta(days=4))}'",
+         'post_to_review': 0,
+         'actual_start': f"'{str(datetime.today() - timedelta(days=4))}'",
          'actual_end': None},
-         {'i': 4, 'name': 'forth_task',
+        {'i': 4, 'name': 'forth_task',
          'description': 'forth task in database - testing',
          'manager_id': 2, 'executor_id': 2,
          'start_date': datetime.today() - timedelta(days=15),
          'planned_end_date':
              datetime.today() - timedelta(days=4),
-         'post_to_review': 0, 'actual_start': f"'{str(datetime.today() - timedelta(days=10))}'",
+         'post_to_review': 0,
+         'actual_start': f"'{str(datetime.today() - timedelta(days=10))}'",
          'actual_end': f"'{str(datetime.today() - timedelta(days=3))}'"}
         ]
 comma = "'"
@@ -119,7 +121,8 @@ SQL_TASKS = []
 for i in range(len(TASK)):
     SQL_TASKS += [
         "INSERT INTO tasks (id, name, description, creation_date,"
-        " manager_id, executor_id, start_date, planned_end_date, post_to_review,"
+        " manager_id, executor_id, start_date, "
+        "planned_end_date, post_to_review,"
         "actual_start_date, actual_end_date) "
         f"VALUES ({TASK[i]['i']}, '{TASK[i]['name']}', "
         f"'{TASK[i]['description']}', '{datetime.today()}' ,"

@@ -2,13 +2,10 @@ import logging
 from datetime import date
 
 from task_manager.statuses.models import Status
-from task_manager.tags.models import Tag
-from task_manager.tasks.models import Task, Plan, IntermediateTaskTag
-from task_manager import db  # noqa 402
-from task_manager.auths.models import User, Permission  # noqa 402
-
+from task_manager.tasks.models import Plan
 
 logger = logging.getLogger(__name__)
+
 
 def create_tasks_list(tasks):
     task_list = []

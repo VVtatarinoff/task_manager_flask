@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import os
 from pathlib import Path
 
 from flask_migrate import upgrade, Migrate
