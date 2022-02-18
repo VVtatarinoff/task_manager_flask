@@ -75,7 +75,7 @@ def upload_task(form, steps):
         for tag in form.tags.data:
             interlink = IntermediateTaskTag(
                 task_id=id,
-                tag_id=tag
+                tag_id=int(tag)
             )
             db.session.add(interlink)
         db.session.commit()

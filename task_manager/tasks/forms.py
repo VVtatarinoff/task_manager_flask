@@ -96,7 +96,7 @@ class TaskBody(FlaskForm):
                                           DataRequired(), ])
     executor = SelectField('Executor ', validators=[
         check_selected("Nominate an executor")])
-    tags = SelectMultipleField('Tags ')
+    tags = SelectMultipleField('Tags ', validate_choice=False)
     submit = SubmitField('Create')
 
     def __init__(self, *args, **kwargs):
@@ -110,7 +110,7 @@ class TaskBody(FlaskForm):
             map(lambda x: (x.id, x.name), tags))
 
     def check_create_task_form(self, new=False):
-        fields = [self.task_name, self.description, self.executor, self.tags]
+        fields = [self.tags, self.task_name, self.description, self.executor]
         success = True
         for field in fields:
             success = success and field.validate(self)

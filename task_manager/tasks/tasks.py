@@ -2,9 +2,10 @@ import logging
 
 from flask import (Blueprint, redirect, url_for, request,
                    flash, render_template, session)
-from flask_login import login_required
+from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
+from task_manager import db
 from task_manager.statuses.models import Status
 from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Task
@@ -64,7 +65,26 @@ def update_task(id):
 @login_required
 @permission_required(Permission.MANAGE)
 def delete_task(id):
-    return redirect(url_for('main.index'))
+    task = Task.query.filter_by(id=id).one()
+    msg = ''
+    if task.actual_end_date:
+        msg = "Could not delete the finished task"
+    if task.manager_user != current_user and not current_user.is_administrator():
+        msg = "Only owner of task could delete the it"
+    if msg:
+        flash(msg, "danger")
+        return redirect(url_for("tasks.show_task_detail", id=id))
+    try:
+        for step in task.plan:
+            db.session.delete(step)
+            db.session.flush()
+        db.session.delete(task)
+        db.session.commit()
+    except Exception as e:
+        flash('Database error during delete transaction', 'danger')
+    else:
+        flash('The task was successfully deleted', 'success')
+    return redirect(url_for("tasks.show_tasks_list"))
 
 
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
