@@ -7,15 +7,14 @@ from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 
 from task_manager.statuses.models import Status
-from task_manager.tags.models import Tag
 from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Task, Plan, IntermediateTaskTag
 from task_manager.tasks.utils import create_tasks_list
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 
-from task_manager import db  # noqa 402
-from task_manager.auths.models import User, Permission  # noqa 402
+from task_manager import db
+from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required  # noqa 402
 
 logger = logging.getLogger(__name__)
@@ -51,38 +50,32 @@ def show_task_detail(id):
 @login_required
 @permission_required(Permission.MANAGE)
 def create_task():  # noqa 901
-    choices = extract_choices()
-
     if not request.form:
         session['steps'] = []
     steps = session.get('steps', [])
-    form = CreateTask(qnty_steps=len(steps), **choices)
-    if form.add_step.data:
-        if msg := get_error_for_step_add(form):
-            flash(msg, "warning")
-        else:
-            step_id = int(form.step_name.data)
-            status = Status.query.filter_by(id=step_id).one()
-            step_name = status.name
-            step = {'id': len(steps),
-                    'step_id': step_id,
-                    'step_name': step_name,
-                    'start': form.start_step_date.data.toordinal(),
-                    'end': form.planned_step_end.data.toordinal()}
-            session['steps'] = steps + [step]
-            form.step_name.data = None
-            form.start_step_date.data = form.start_step_date.raw_data = None
-            form.planned_step_end.data = form.planned_step_end.raw_data = None
-    if form.del_step.data:
-        if msg := get_error_for_step_delete(form):
-            flash(msg, "warning")
-        else:
-            new_steps = []
-            for step in steps:
-                if str(step['id']) not in form.del_option.raw_data:
-                    new_steps.append(step)
-            form.del_option.raw_data = []
-            session['steps'] = new_steps
+    form = CreateTask()
+    if form.add_step.data and form.check_adding_step_form():
+        step_id = int(form.step_name.data)
+        status = Status.query.filter_by(id=step_id).one()
+        step_name = status.name
+        step = {'id': len(steps),
+                'step_id': step_id,
+                'step_name': step_name,
+                'start': form.start_step_date.data.toordinal(),
+                'end': form.planned_step_end.data.toordinal()}
+        steps += [step]
+        session['steps'] = steps
+        form.clear_step_data()
+    if form.del_step.data and form.del_option.raw_data:
+        new_steps = []
+        counter = 0
+        for step in steps:
+            if str(step['id']) not in form.del_option.raw_data:
+                step['id'] = counter
+                counter += 1
+                new_steps.append(step)
+        form.del_option.raw_data = []
+        session['steps'] = new_steps
     if form.submit.data:
         if msg := get_error_create_form(form, steps):
             flash(msg, "warning")
@@ -133,21 +126,6 @@ def upload_task(form, steps):
     return True
 
 
-def extract_choices():
-    choices = dict()
-    executors = User.query.filter(User.role_id.in_([1, 2])).all()
-    choices['executors'] = [(None, '   <------>     ')] + list(
-        map(lambda x: (x.id, f"{x.first_name} {x.last_name}"),
-            executors))
-    tags = Tag.query.all()
-    choices['tags'] = [(None, '   <------>     ')] + list(
-        map(lambda x: (x.id, x.name), tags))
-    statuses = Status.query.all()
-    choices['step_names'] = [(None, '   <------>     ')] + list(
-        map(lambda x: (x.id, x.name), statuses))
-    return choices
-
-
 def get_error_create_form(form, steps):
     if not steps:
         return "Provide a plan for task"
@@ -157,27 +135,6 @@ def get_error_create_form(form, steps):
         return "Name of task should be at least 4 characters"
     if len(list(Task.query.filter_by(name=form.task_name.data).all())) > 0:
         return "Task with such name exists in database"
-    return False
-
-
-def get_error_for_step_add(form):   # noqa 162
-    step_id = form.step_name.data
-    start = form.start_step_date.data
-    end = form.planned_step_end.data
-    if step_id == "None":
-        return "Choose the step to include"
-    if not start:
-        return "Input start date"
-    if not end:
-        return "Input deadline"
-    step_id = int(step_id)
-    step = list(Status.query.filter_by(id=step_id).all())
-    if len(step) == 0:
-        return "No such status exists in database"
-    if end < start:
-        return "Start date greater than deadline"
-    if start < date.today():
-        return "The start date is in the past"
     return False
 
 
@@ -192,10 +149,3 @@ def normalize_steps_set(steps):
                         'end': date.fromordinal(step['end'])}]
     normalized.sort(key=lambda x: x['start'])
     return normalized
-
-
-def get_error_for_step_delete(form):
-    choices = form.del_option.raw_data
-    if not choices:
-        return "Select steps to delete"
-    return False

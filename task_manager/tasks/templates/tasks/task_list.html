@@ -3,7 +3,7 @@
 
 {% block filter %}
 {% endblock filter %}
-<button class="nav-link btn btn-primary mb-3" href={{ url_for('tasks.create_task') }}>Create task</button>
+<a class="btn btn-primary mb-3" href={{ url_for('tasks.create_task') }}>Create task</a>
 <table class="table table-bordered table-hover table-sm table-responsive-md">
     <thead class="table-primary" scope="col">
         {% for t_head in table_heads %}
