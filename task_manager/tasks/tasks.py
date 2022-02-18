@@ -8,7 +8,9 @@ from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 from task_manager.statuses.models import Status
 from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Task
-from task_manager.tasks.utils import create_tasks_list, upload_task, normalize_steps_set
+from task_manager.tasks.utils import (create_tasks_list,
+                                      upload_task,
+                                      normalize_steps_set)
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
 

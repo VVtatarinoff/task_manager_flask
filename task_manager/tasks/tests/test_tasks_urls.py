@@ -13,7 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize('page', ['tasks.show_tasks_list',
-                                  'tasks.create_task'])
+                                  'tasks.create_task',
+                                  'tasks.show_task_detail',
+                                  'tasks.update_task',
+                                  'tasks.delete_task'])
 def test_show_tasks_list_unlogged_get(db_task, client, page):
     response = client.get(
         url_for(page, id=1))
@@ -24,14 +27,17 @@ def test_show_tasks_list_unlogged_get(db_task, client, page):
     assert parsed.path == url_for('users.login')
 
 
-@pytest.mark.parametrize('page', ['tasks.show_tasks_list'])
-def test_show_tasks_list_unlogged_post(db_task, client, page):
+@pytest.mark.parametrize('page', ['tasks.show_tasks_list',
+                                  'tasks.show_task_detail'])
+def test_show_tasks_list_unlogged_post405(db_task, client, page):
     response = client.post(url_for(page, id=1))
     assert response.status_code == 405
 
 
-@pytest.mark.parametrize('page', ['tasks.create_task'])
-def test_show_tasks_list_unlogged_post(db_task, client, page):
+@pytest.mark.parametrize('page', ['tasks.create_task',
+                                  'tasks.update_task',
+                                  'tasks.delete_task'])
+def test_show_tasks_list_unlogged_post302(db_task, client, page):
     response = client.post(url_for(page, id=1))
     assert response.status_code == 302
     msg = get_flashed_messages()
@@ -66,4 +72,3 @@ def test_show_task_list_authorized(app, db_task, client):
     tasks_count = Task.query.count()
     lines = response.data.count(b'</tr')
     assert lines == tasks_count
-
