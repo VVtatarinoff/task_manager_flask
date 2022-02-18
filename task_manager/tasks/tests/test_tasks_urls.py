@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
                                   'tasks.create_task',
                                   'tasks.show_task_detail',
                                   'tasks.update_task',
-                                  'tasks.delete_task',])
+                                  'tasks.delete_task'])
 def test_show_tasks_list_unlogged_get(db_task, client, page):
     response = client.get(
         url_for(page, id=1))

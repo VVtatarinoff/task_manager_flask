@@ -59,8 +59,8 @@ def show_task_detail(id):
 @permission_required(Permission.MANAGE)
 def update_task(id):
     task = Task.query.filter_by(id=id).one()
-    if task.manager_user != current_user and not current_user.is_administrator():
-        flash("Only owner of the task could change it", 'warning')
+    if msg := get_error_modifing_task(task):
+        flash(msg, 'warning')
         return redirect(url_for("tasks.show_task_detail", id=id))
     if not request.form:
         session['tags'] = []
@@ -83,17 +83,22 @@ def update_task(id):
     return render_template('tasks/task_update.html', **context)
 
 
+def get_error_modifing_task(task):
+    msg = ''
+    if task.actual_end_date:
+        msg = "Could not delete or change the finished task"
+    if task.manager_user != current_user and (
+            not current_user.is_administrator()):
+        msg = "Only owner of the task could delete or change it"
+    return msg
+
+
 @tasks_bp.route('/task_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
 def delete_task(id):
     task = Task.query.filter_by(id=id).one()
-    msg = ''
-    if task.actual_end_date:
-        msg = "Could not delete the finished task"
-    if task.manager_user != current_user and not current_user.is_administrator():
-        msg = "Only owner of the task could delete it"
-    if msg:
+    if msg := get_error_modifing_task(task):
         flash(msg, "danger")
         return redirect(url_for("tasks.show_task_detail", id=id))
     try:
@@ -102,7 +107,7 @@ def delete_task(id):
             db.session.flush()
         db.session.delete(task)
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError:
         flash('Database error during delete transaction', 'danger')
     else:
         flash('The task was successfully deleted', 'success')
