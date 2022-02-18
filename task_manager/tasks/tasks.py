@@ -1,18 +1,16 @@
 import logging
-from datetime import date
 
 from flask import (Blueprint, redirect, url_for, request,
                    flash, render_template, session)
-from flask_login import login_required, current_user
-from sqlalchemy.exc import SQLAlchemyError
+from flask_login import login_required
+from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager.statuses.models import Status
 from task_manager.tasks.forms import CreateTask
-from task_manager.tasks.models import Task, Plan, IntermediateTaskTag
-from task_manager.tasks.utils import create_tasks_list
+from task_manager.tasks.models import Task
+from task_manager.tasks.utils import create_tasks_list, upload_task, normalize_steps_set
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
-from task_manager import db
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 
@@ -32,8 +30,8 @@ def show_tasks_list():
                               'Current status')
     try:
         tasks = Task.query.all()
-    except SQLAlchemyError as e:
-        flash('Database error ', e)
+    except SQLAlchemyError:
+        flash('Database error ', 'danger')
         return redirect(url_for('main.index'))
     context['table_data'] = create_tasks_list(tasks)
     return render_template('tasks/task_list.html', **context)
@@ -42,7 +40,15 @@ def show_tasks_list():
 @tasks_bp.route('/task_detail/<int:id>')
 @login_required
 def show_task_detail(id):
-    return redirect(url_for('main.index'))
+    try:
+        task = Task.query.filter_by(id=id).one()
+    except NoResultFound:
+        flash('No such task in the database', "warning")
+        return redirect(url_for('main.index'))
+    context = dict()
+    context['task'] = task
+    context['title'] = 'Task page'
+    return render_template('tasks/task_profile.html', **context)
 
 
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
@@ -91,54 +97,4 @@ def create_task():  # noqa 901
     return render_template('tasks/task_creation.html', **context)
 
 
-def upload_task(form, steps):
-    manager_id = current_user.id
-    executor_id = form.executor.data
-    task_name = form.task_name.data
-    task_description = form.description.data
-    task_start = sorted(list(map(lambda x: x['start'], steps)))[0]
-    task_planned_end = sorted(list(map(lambda x: x['end'], steps)))[0]
-    task = Task(name=task_name, description=task_description,
-                manager_id=manager_id, executor_id=executor_id,
-                start_date=task_start, planned_end_date=task_planned_end)
-    try:
-        db.session.add(task)
-        db.session.flush()
-        id = task.id
-        for step in steps:
-            plan_item = Plan(start_date=step['start'],
-                             planned_end=step['end'],
-                             status_id=step['step_id'],
-                             task_id=id,
-                             executor_id=executor_id)
-            db.session.add(plan_item)
-        for tag in form.tags.data:
-            interlink = IntermediateTaskTag(
-                task_id=id,
-                tag_id=tag
-            )
-            db.session.add(interlink)
-        db.session.commit()
-    except SQLAlchemyError:
-        db.session.rollback()
-        return False
-    return True
 
-
-def get_error_create_form(form, steps):
-    if not steps:
-        return "Provide a plan for task"
-    return False
-
-
-def normalize_steps_set(steps):
-    normalized = []
-
-    for step in steps:
-        normalized += [{'id': int(step['id']),
-                        'step_id': int(step['step_id']),
-                        'step_name': step['step_name'],
-                        'start': date.fromordinal(step['start']),
-                        'end': date.fromordinal(step['end'])}]
-    normalized.sort(key=lambda x: x['start'])
-    return normalized

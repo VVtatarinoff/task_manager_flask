@@ -12,8 +12,9 @@ from task_manager.database.development_sql_fill import (
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.parametrize('page', ['tasks.show_tasks_list'])
-def test_show_tasks_list_unauthorized(db_task, client, page):
+@pytest.mark.parametrize('page', ['tasks.show_tasks_list',
+                                  'tasks.create_task'])
+def test_show_tasks_list_unlogged_get(db_task, client, page):
     response = client.get(
         url_for(page, id=1))
     assert response.status_code == 302
@@ -21,8 +22,35 @@ def test_show_tasks_list_unauthorized(db_task, client, page):
     assert msg[0] == 'Please log in to access this page.'
     parsed = urllib.parse.urlparse(response.location)
     assert parsed.path == url_for('users.login')
+
+
+@pytest.mark.parametrize('page', ['tasks.show_tasks_list'])
+def test_show_tasks_list_unlogged_post(db_task, client, page):
     response = client.post(url_for(page, id=1))
     assert response.status_code == 405
+
+
+@pytest.mark.parametrize('page', ['tasks.create_task'])
+def test_show_tasks_list_unlogged_post(db_task, client, page):
+    response = client.post(url_for(page, id=1))
+    assert response.status_code == 302
+    msg = get_flashed_messages()
+    assert msg[0] == 'Please log in to access this page.'
+    parsed = urllib.parse.urlparse(response.location)
+    assert parsed.path == url_for('users.login')
+
+
+@pytest.mark.parametrize('page', ['tasks.create_task'])
+def test_show_tasks_list_unthorized_post(db_task, client, page):
+    client.post(url_for('users.login'),
+                data={'email': EXECUTOR['email'],
+                      'psw': EXECUTOR['password']})
+    _ = get_flashed_messages()
+    assert current_user.is_authenticated
+    response = client.get(
+        url_for('tasks.show_tasks_list'))
+    response = client.post(url_for(page, id=1))
+    assert response.status_code == 403
 
 
 def test_show_task_list_authorized(app, db_task, client):
@@ -38,3 +66,4 @@ def test_show_task_list_authorized(app, db_task, client):
     tasks_count = Task.query.count()
     lines = response.data.count(b'</tr')
     assert lines == tasks_count
+

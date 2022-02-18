@@ -1,8 +1,12 @@
 import logging
 from datetime import date
 
+from flask_login import current_user
+from sqlalchemy.exc import SQLAlchemyError
+
+from task_manager import db
 from task_manager.statuses.models import Status
-from task_manager.tasks.models import Plan
+from task_manager.tasks.models import Plan, IntermediateTaskTag, Task
 
 logger = logging.getLogger(__name__)
 
@@ -45,3 +49,50 @@ def get_current_status(steps):
             status_name = status.name
             return status_name
     return 'No status'
+
+
+def upload_task(form, steps):
+    manager_id = current_user.id
+    executor_id = form.executor.data
+    task_name = form.task_name.data
+    task_description = form.description.data
+    task_start = sorted(list(map(lambda x: x['start'], steps)))[0]
+    task_planned_end = sorted(list(map(lambda x: x['end'], steps)))[0]
+    task = Task(name=task_name, description=task_description,
+                manager_id=manager_id, executor_id=executor_id,
+                start_date=task_start, planned_end_date=task_planned_end)
+    try:
+        db.session.add(task)
+        db.session.flush()
+        id = task.id
+        for step in steps:
+            plan_item = Plan(start_date=step['start'],
+                             planned_end=step['end'],
+                             status_id=step['step_id'],
+                             task_id=id,
+                             executor_id=executor_id)
+            db.session.add(plan_item)
+        for tag in form.tags.data:
+            interlink = IntermediateTaskTag(
+                task_id=id,
+                tag_id=tag
+            )
+            db.session.add(interlink)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return False
+    return True
+
+
+def normalize_steps_set(steps):
+    normalized = []
+
+    for step in steps:
+        normalized += [{'id': int(step['id']),
+                        'step_id': int(step['step_id']),
+                        'step_name': step['step_name'],
+                        'start': date.fromordinal(step['start']),
+                        'end': date.fromordinal(step['end'])}]
+    normalized.sort(key=lambda x: x['start'])
+    return normalized
