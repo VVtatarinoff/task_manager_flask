@@ -98,4 +98,12 @@
 
     </div>
 </div>
+<div class="row">
+    <div class="col-2">
+        <a class="btn btn-primary mb-3" href={{ url_for('tasks.update_task', id=task.id) }}>Change task</a>
+    </div>
+    <div class="col-2">
+        <a class="btn btn-secondary mb-3" href={{ url_for('tasks.delete_task', id=task.id) }}>Delete task</a>
+    </div>
+</div>
 {% endblock content %}

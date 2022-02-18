@@ -51,6 +51,20 @@ def show_task_detail(id):
     return render_template('tasks/task_profile.html', **context)
 
 
+@tasks_bp.route('/task_update/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE)
+def update_task(id):
+    return redirect(url_for('main.index'))
+
+
+@tasks_bp.route('/task_delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE)
+def delete_task(id):
+    return redirect(url_for('main.index'))
+
+
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
@@ -95,6 +109,3 @@ def create_task():  # noqa 901
     context['steps'] = normalize_steps_set(session['steps'])
 
     return render_template('tasks/task_creation.html', **context)
-
-
-
