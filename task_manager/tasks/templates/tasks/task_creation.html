@@ -3,7 +3,7 @@
 <form method="post">
     {{ form.hidden_tag() }}
 
-     {% for field in form if field.name not in ['csrf_token', 'submit', 'add_step', 'step_name', 'start_step_date', 'planned_step_end', 'del_step', 'del_option'] %}
+     {% for field in form if field.name not in ['csrf_token', 'submit', 'add_step', 'status_name', 'start_date', 'planned_end', 'del_step', 'del_option'] %}
         <div class="form-group">
         {{ field.label(class="form-label", size=20 ) }}
             {% if field.errors %}
@@ -37,11 +37,11 @@
             <tbody>
             {% for step in session.steps %}
             <tr>
-                <td>{{ step.step_name }}</td>
-                <td class='text-center'>{{ step.start }}</td>
-                <td class='text-center'>{{ step.end }}</td>
+                <td>{{ step.status_name }}</td>
+                <td class='text-center'>{{ step.start_date }}</td>
+                <td class='text-center'>{{ step.planned_end }}</td>
                 <td class='text-center text-danger'>
-                    <input type="checkbox" id="del_option" name="del_option" value={{ step.id }} >
+                    <input type="checkbox" id="del_option" name="del_option" value={{ step.plan_id }} >
 
                 </td>
             </tr>
@@ -51,7 +51,7 @@
 
         <div class="row" method="post">
             {% for field in form if field.name not in ['csrf_token', 'submit', 'task_name', 'description', 'executor', 'tags', 'add_step', 'del_step', 'del_option'] %}
-                {% if field.name == 'step_name' %}
+                {% if field.name == 'status_name' %}
                     <div class="form-group col-2">
                 {% else %}
                     <div class="form-group col-3">
@@ -82,7 +82,7 @@
             </div>
             <div class="form-group col-auto">
                 <div class="mr-3 ml-1">
-                {% if steps %}
+                {% if session.steps %}
                     <br>
                 <input class='text-center btn btn-light btn-outline-danger mt-1' id="del_step" name="del_step" type="submit" value="Delete checked" >
                 {% endif %}

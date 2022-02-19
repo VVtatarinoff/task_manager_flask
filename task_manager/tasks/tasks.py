@@ -12,6 +12,7 @@ from task_manager.tasks.forms import CreateTask, EditTaskForm
 from task_manager.tasks.models import Task
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
+from task_manager.tasks.session import SessionPlan
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 from task_manager.tasks.utils import (create_tasks_list,
@@ -118,32 +119,15 @@ def convert_string_to_date(date_string: str) -> date:
 @login_required
 @permission_required(Permission.MANAGE)
 def create_task():  # noqa 901
-    if not request.form:
-        session['steps'] = []
-    steps = session.get('steps', [])
+    steps=SessionPlan(new=not request.form)
     form = CreateTask()
     if form.add_step.data and form.check_adding_step_form():
-        step_id = int(form.step_name.data)
-        status = Status.query.filter_by(id=step_id).one()
-        step_name = status.name
-        step = {'id': len(steps),
-                'step_id': step_id,
-                'step_name': step_name,
-                'start': convert_date_to_string(form.start_step_date.data),
-                'end': convert_date_to_string(form.planned_step_end.data)}
-        steps += [step]
-        session['steps'] = steps
+        step_id = int(form.status_name.data)
+        steps.add_step_from_form(status_id=step_id, form=form)
         form.clear_step_data()
     if form.del_step.data and form.del_option.raw_data:
-        new_steps = []
-        counter = 0
-        for step in steps:
-            if str(step['id']) not in form.del_option.raw_data:
-                step['id'] = counter
-                counter += 1
-                new_steps.append(step)
+        steps.remove_step_from_session(form.del_option.raw_data)
         form.del_option.raw_data = []
-        session['steps'] = new_steps
     if form.submit.data and form.check_create_task_form(new=True):
         if not steps:
             flash("Provide a plan for task", 'danger')
@@ -155,8 +139,6 @@ def create_task():  # noqa 901
     context = dict()
     context['form'] = form
     context['title'] = 'Create task'
-    context['steps'] = normalize_steps_set(session['steps'])
-
     return render_template('tasks/task_creation.html', **context)
 
 

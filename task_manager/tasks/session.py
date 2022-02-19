@@ -75,7 +75,7 @@ class SessionPlan(object):
         Returns:
             None
         """
-        id = min(chain([0], map(lambda x: int(x['id']), self.steps))) - 1
+        id = min(chain([0], map(lambda x: int(x['plan_id']), self.steps))) - 1
         status = Status.query.filter_by(id=status_id).one()
         if executor_id:
             executor = User.query.filter_by(id=executor_id).one()
@@ -86,28 +86,32 @@ class SessionPlan(object):
             {'plan_id': id,
              'status_id': status.id,
              'status_name': status.name,
-             'start_date': self.convert_date_to_string(form.start_date.data),
-             'actual_start': self.convert_date_to_string(form.actual_start.data),
-             'planned_end': self.convert_date_to_string(form.planned_end.data),
-             'actual_end_date': self.convert_date_to_string(form.actual_end_date.data),
+             'start_date': self.convert_date_to_string(form['start_date'].data),
+             'actual_start':
+                 self.convert_date_to_string(form['actual_start'].data) if 'actual start' in form else None,
+             'planned_end':
+                 self.convert_date_to_string(form['planned_end'].data) if 'planned_end' in form else None,
+             'actual_end_date':
+                 self.convert_date_to_string(form['actual_end_date'].data) if 'actual_end_date' in form else None,
              'executor_id': executor_id,
              'executor_name': executor_name
              }
         )
         self.save_to_session()
 
-    def remove_step_from_session(self, plan_id: int) -> None:
+    def remove_step_from_session(self, plan_ids: list) -> None:
         """
-        removes step from plan stored in session
-        plan_id should be vali id
+        removes steps from plan stored in session
+        numbers in plan_ids should be valiid
         Args:
-            plan_id: plan_id in self.steps dictionaryelement
+            plan_ids: list of plan_id in self.steps dictionary element to remove
 
         Returns:
             None
         """
-        index = dict(map(lambda x: (x[1]['plan_id'], x[0]), enumerate(self.steps)))[plan_id]
-        self.steps.pop(index)
+        for id in plan_ids:
+            index = dict(map(lambda x: (x[1]['plan_id'], x[0]), enumerate(self.steps)))[int(id)]
+            self.steps.pop(index)
         self.save_to_session()
 
     @staticmethod

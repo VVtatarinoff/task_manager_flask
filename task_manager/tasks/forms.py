@@ -41,12 +41,12 @@ def check_not_empty(msg=''):
 
 
 class StepTask(FlaskForm):
-    step_name = SelectField('Step name', validators=[
+    status_name = SelectField('Step name', validators=[
         check_selected("Choose the step to include")])
-    start_step_date = DateField('Start date',
+    start_date = DateField('Start date',
                                 validators=[
                                     check_data_not_in_past()])
-    planned_step_end = DateField(
+    planned_end = DateField(
         'Deadline',
         validators=[check_data_not_in_past()])
     add_step = SubmitField('Add step')
@@ -58,7 +58,7 @@ class StepTask(FlaskForm):
         statuses = Status.query.all()
         choices = [(None, '   <------>     ')] + list(
             map(lambda x: (x.id, x.name), statuses))
-        self.step_name.choices = choices
+        self.status_name.choices = choices
         self.del_option.choices = self.del_option.choices or []
 
     def check_adding_step_form(self):
@@ -67,22 +67,22 @@ class StepTask(FlaskForm):
                 Returns `True` if no errors occur.
                 """
         success = True
-        fields = [self.step_name, self.planned_step_end,
-                  self.start_step_date]
+        fields = [self.status_name, self.planned_end,
+                  self.start_date]
         for field in fields:
             success = success and field.validate(self)
         if success and (
-                self.planned_step_end.data < self.start_step_date.data):
+                self.planned_end.data < self.start_date.data):
             success = False
-            self.start_step_date.errors = list(
-                *self.start_step_date.errors
+            self.start_date.errors = list(
+                *self.start_date.errors
             ) + ["Start date greater than deadline"]
         return success
 
     def clear_step_data(self):
-        self.step_name.data = ""
-        self.start_step_date.data = self.start_step_date.raw_data = None
-        self.planned_step_end.data = self.planned_step_end.raw_data = None
+        self.status_name.data = ""
+        self.start_date.data = self.start_date.raw_data = None
+        self.planned_end.data = self.planned_end.raw_data = None
 
 
 class TaskBody(FlaskForm):

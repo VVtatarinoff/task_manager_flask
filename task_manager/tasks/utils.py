@@ -93,14 +93,3 @@ def get_error_modifing_task(task):
             not current_user.is_administrator()):
         msg = "Only owner of the task could delete or change it"
     return msg
-
-
-class Step(dict):
-    pass
-
-
-class SessionPlan(object):
-    def __init__(self):
-        steps = {
-            'id': 0
-        }
