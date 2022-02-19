@@ -131,7 +131,7 @@ def create_task():  # noqa 901
     if form.submit.data and form.check_create_task_form(new=True):
         if not steps:
             flash("Provide a plan for task", 'danger')
-        elif upload_task(form, normalize_steps_set(session['steps'])):
+        elif upload_task(form):
             flash('Task successfully created', 'success')
             return redirect(url_for('tasks.show_tasks_list'))
         else:

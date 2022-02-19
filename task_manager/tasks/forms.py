@@ -117,7 +117,7 @@ class TaskBody(FlaskForm):
             success = success and field.validate(self)
         if success and new and list(
                 Task.query.filter_by(name=self.task_name.data).all()):
-            self.task_name.data.errors = [
+            self.task_name.errors = [
                 "Task with such name exists in database"]
             success = False
         return success

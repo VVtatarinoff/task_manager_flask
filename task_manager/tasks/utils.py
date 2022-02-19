@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from task_manager import db
 from task_manager.statuses.models import Status
 from task_manager.tasks.models import Plan, IntermediateTaskTag, Task
+from task_manager.tasks.session import SessionPlan
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +52,14 @@ def get_current_status(steps):
     return 'No status'
 
 
-def upload_task(form, steps):
+def upload_task(form):
     manager_id = current_user.id
     executor_id = form.executor.data
     task_name = form.task_name.data
     task_description = form.description.data
-    task_start = sorted(list(map(lambda x: x['start'], steps)))[0]
-    task_planned_end = sorted(list(map(lambda x: x['end'], steps)))[0]
+    steps = SessionPlan().plan
+    task_start = sorted(list(map(lambda x: x['start_date'], steps)))[0]
+    task_planned_end = sorted(list(map(lambda x: x['planned_end'], steps)))[0]
     task = Task(name=task_name, description=task_description,
                 manager_id=manager_id, executor_id=executor_id,
                 start_date=task_start, planned_end_date=task_planned_end)
@@ -66,9 +68,9 @@ def upload_task(form, steps):
         db.session.flush()
         id = task.id
         for step in steps:
-            plan_item = Plan(start_date=step['start'],
-                             planned_end=step['end'],
-                             status_id=step['step_id'],
+            plan_item = Plan(start_date=step['start_date'],
+                             planned_end=step['planned_end'],
+                             status_id=step['status_id'],
                              task_id=id,
                              executor_id=executor_id)
             db.session.add(plan_item)

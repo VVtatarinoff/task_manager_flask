@@ -1,3 +1,4 @@
+import copy
 from datetime import date
 from itertools import chain
 
@@ -28,7 +29,7 @@ class SessionPlan(object):
 
     def __init__(self, new: bool = False, plan: Plan = None) -> None:
         if new:
-            self.steps: list = []
+            self.steps = []
         elif plan:
             self.extract_steps_from_plan()
         else:
@@ -64,6 +65,7 @@ class SessionPlan(object):
             step_dict['executor_id'] = step.executor_id
             step_dict['executor_name'] = step.user_executor
             self.steps += [step_dict]
+        self._sort_steps()
 
     def add_step_from_form(self, form, status_id: int, executor_id: int = None) -> None:
         """
@@ -97,6 +99,7 @@ class SessionPlan(object):
              'executor_name': executor_name
              }
         )
+        self._sort_steps()
         self.save_to_session()
 
     def remove_step_from_session(self, plan_ids: list) -> None:
@@ -112,7 +115,21 @@ class SessionPlan(object):
         for id in plan_ids:
             index = dict(map(lambda x: (x[1]['plan_id'], x[0]), enumerate(self.steps)))[int(id)]
             self.steps.pop(index)
+        self._sort_steps()
         self.save_to_session()
+
+    def _sort_steps(self) ->None:
+        self.steps.sort(key=lambda k: self.convert_string_to_date(k['start_date']))
+
+    @property
+    def plan(self):
+        steps_copy = copy.deepcopy(self.steps)
+        for step in steps_copy:
+            step['start_date'] = self.convert_string_to_date(step['start_date'])
+            step['actual_start'] = self.convert_string_to_date(step['actual_start'])
+            step['planned_end']= self.convert_string_to_date(step['planned_end'])
+            step['actual_end_date']= self.convert_string_to_date(step['actual_end_date'])
+        return steps_copy
 
     @staticmethod
     def convert_date_to_string(raw_date: date) -> str:
@@ -120,5 +137,7 @@ class SessionPlan(object):
 
     @staticmethod
     def convert_string_to_date(date_string: str) -> date:
+        if date_string is None or date_string == 'None':
+            return
         day, month, year = tuple(map(int, date_string.split('-')))
         return date(year, month, day)
