@@ -35,11 +35,11 @@
             </th>
             </thead>
             <tbody>
-            {% for step in steps %}
+            {% for step in session.steps %}
             <tr>
                 <td>{{ step.step_name }}</td>
-                <td class='text-center'>{{ step.start.strftime('%d-%m-%Y') }}</td>
-                <td class='text-center'>{{ step.end.strftime('%d-%m-%Y') }}</td>
+                <td class='text-center'>{{ step.start }}</td>
+                <td class='text-center'>{{ step.end }}</td>
                 <td class='text-center text-danger'>
                     <input type="checkbox" id="del_option" name="del_option" value={{ step.id }} >
 

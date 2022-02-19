@@ -85,14 +85,22 @@ def upload_task(form, steps):
     return True
 
 
-def normalize_steps_set(steps):
-    normalized = []
+def get_error_modifing_task(task):
+    msg = ''
+    if task.actual_end_date:
+        msg = "Could not delete or change the finished task"
+    if task.manager_user != current_user and (
+            not current_user.is_administrator()):
+        msg = "Only owner of the task could delete or change it"
+    return msg
 
-    for step in steps:
-        normalized += [{'id': int(step['id']),
-                        'step_id': int(step['step_id']),
-                        'step_name': step['step_name'],
-                        'start': date.fromordinal(step['start']),
-                        'end': date.fromordinal(step['end'])}]
-    normalized.sort(key=lambda x: x['start'])
-    return normalized
+
+class Step(dict):
+    pass
+
+
+class SessionPlan(object):
+    def __init__(self):
+        steps = {
+            'id': 0
+        }

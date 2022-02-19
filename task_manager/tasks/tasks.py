@@ -1,21 +1,22 @@
 import logging
+from datetime import date
 
 from flask import (Blueprint, redirect, url_for, request,
                    flash, render_template, session)
-from flask_login import login_required, current_user
+from flask_login import login_required
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager import db
 from task_manager.statuses.models import Status
 from task_manager.tasks.forms import CreateTask, EditTaskForm
 from task_manager.tasks.models import Task
-from task_manager.tasks.utils import (create_tasks_list,
-                                      upload_task,
-                                      normalize_steps_set)
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
+from task_manager.tasks.utils import (create_tasks_list,
+                                      upload_task,
+                                      get_error_modifing_task)
 
 logger = logging.getLogger(__name__)
 
@@ -83,16 +84,6 @@ def update_task(id):
     return render_template('tasks/task_update.html', **context)
 
 
-def get_error_modifing_task(task):
-    msg = ''
-    if task.actual_end_date:
-        msg = "Could not delete or change the finished task"
-    if task.manager_user != current_user and (
-            not current_user.is_administrator()):
-        msg = "Only owner of the task could delete or change it"
-    return msg
-
-
 @tasks_bp.route('/task_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
@@ -114,6 +105,15 @@ def delete_task(id):
     return redirect(url_for("tasks.show_tasks_list"))
 
 
+def convert_date_to_string(raw_date: date) -> str:
+    return raw_date.strftime('%d-%m-%Y')
+
+
+def convert_string_to_date(date_string: str) -> date:
+    day, month, year = tuple(map(int, date_string.split('-')))
+    return date(year, month, day)
+
+
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
@@ -129,8 +129,8 @@ def create_task():  # noqa 901
         step = {'id': len(steps),
                 'step_id': step_id,
                 'step_name': step_name,
-                'start': form.start_step_date.data.toordinal(),
-                'end': form.planned_step_end.data.toordinal()}
+                'start': convert_date_to_string(form.start_step_date.data),
+                'end': convert_date_to_string(form.planned_step_end.data)}
         steps += [step]
         session['steps'] = steps
         form.clear_step_data()
@@ -158,3 +158,16 @@ def create_task():  # noqa 901
     context['steps'] = normalize_steps_set(session['steps'])
 
     return render_template('tasks/task_creation.html', **context)
+
+
+def normalize_steps_set(steps):
+    normalized = []
+
+    for step in steps:
+        normalized += [{'id': int(step['id']),
+                        'step_id': int(step['step_id']),
+                        'step_name': step['step_name'],
+                        'start': convert_string_to_date(step['start']),
+                        'end': convert_string_to_date(step['end'])}]
+    normalized.sort(key=lambda x: x['start'])
+    return normalized
