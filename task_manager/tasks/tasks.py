@@ -7,17 +7,17 @@ from flask_login import login_required
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager import db
-from task_manager.statuses.models import Status
 from task_manager.tasks.forms import CreateTask, EditTaskForm
 from task_manager.tasks.models import Task
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
 from task_manager.tasks.session import SessionPlan
-
-tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 from task_manager.tasks.utils import (create_tasks_list,
                                       upload_task,
                                       get_error_modifing_task)
+
+tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
+
 
 logger = logging.getLogger(__name__)
 
@@ -118,8 +118,8 @@ def convert_string_to_date(date_string: str) -> date:
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
-def create_task():  # noqa 901
-    steps=SessionPlan(new=not request.form)
+def create_task():
+    steps = SessionPlan(new=not request.form)
     form = CreateTask()
     if form.add_step.data and form.check_adding_step_form():
         step_id = int(form.status_name.data)

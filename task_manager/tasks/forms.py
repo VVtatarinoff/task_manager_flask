@@ -44,8 +44,8 @@ class StepTask(FlaskForm):
     status_name = SelectField('Step name', validators=[
         check_selected("Choose the step to include")])
     start_date = DateField('Start date',
-                                validators=[
-                                    check_data_not_in_past()])
+                           validators=[
+                               check_data_not_in_past()])
     planned_end = DateField(
         'Deadline',
         validators=[check_data_not_in_past()])

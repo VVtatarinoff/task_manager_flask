@@ -67,7 +67,8 @@ class SessionPlan(object):
             self.steps += [step_dict]
         self._sort_steps()
 
-    def add_step_from_form(self, form, status_id: int, executor_id: int = None) -> None:
+    def add_step_from_form(self, form, status_id: int,
+                           executor_id: int = None) -> None:
         """
         update session variable with new step
         Args:
@@ -77,6 +78,12 @@ class SessionPlan(object):
         Returns:
             None
         """
+        def get_str_date_from_field(field_name):
+            if field_name in form:
+                return self.convert_date_to_string(form[field_name].data)
+            else:
+                return None
+
         id = min(chain([0], map(lambda x: int(x['plan_id']), self.steps))) - 1
         status = Status.query.filter_by(id=status_id).one()
         if executor_id:
@@ -88,13 +95,10 @@ class SessionPlan(object):
             {'plan_id': id,
              'status_id': status.id,
              'status_name': status.name,
-             'start_date': self.convert_date_to_string(form['start_date'].data),
-             'actual_start':
-                 self.convert_date_to_string(form['actual_start'].data) if 'actual start' in form else None,
-             'planned_end':
-                 self.convert_date_to_string(form['planned_end'].data) if 'planned_end' in form else None,
-             'actual_end_date':
-                 self.convert_date_to_string(form['actual_end_date'].data) if 'actual_end_date' in form else None,
+             'start_date': get_str_date_from_field('start_date'),
+             'actual_start': get_str_date_from_field('actual_start'),
+             'planned_end': get_str_date_from_field('planned_end'),
+             'actual_end_date': get_str_date_from_field('actual_end_date'),
              'executor_id': executor_id,
              'executor_name': executor_name
              }
@@ -113,22 +117,28 @@ class SessionPlan(object):
             None
         """
         for id in plan_ids:
-            index = dict(map(lambda x: (x[1]['plan_id'], x[0]), enumerate(self.steps)))[int(id)]
+            index = dict(map(lambda x: (x[1]['plan_id'],
+                                        x[0]), enumerate(self.steps)))[int(id)]
             self.steps.pop(index)
         self._sort_steps()
         self.save_to_session()
 
-    def _sort_steps(self) ->None:
-        self.steps.sort(key=lambda k: self.convert_string_to_date(k['start_date']))
+    def _sort_steps(self) -> None:
+        self.steps.sort(
+            key=lambda k: self.convert_string_to_date(k['start_date']))
 
     @property
     def plan(self):
         steps_copy = copy.deepcopy(self.steps)
         for step in steps_copy:
-            step['start_date'] = self.convert_string_to_date(step['start_date'])
-            step['actual_start'] = self.convert_string_to_date(step['actual_start'])
-            step['planned_end']= self.convert_string_to_date(step['planned_end'])
-            step['actual_end_date']= self.convert_string_to_date(step['actual_end_date'])
+            step['start_date'] = self.convert_string_to_date(
+                step['start_date'])
+            step['actual_start'] = self.convert_string_to_date(
+                step['actual_start'])
+            step['planned_end'] = self.convert_string_to_date(
+                step['planned_end'])
+            step['actual_end_date'] = self.convert_string_to_date(
+                step['actual_end_date'])
         return steps_copy
 
     @staticmethod
