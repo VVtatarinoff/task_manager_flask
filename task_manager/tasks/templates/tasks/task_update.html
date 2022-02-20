@@ -36,14 +36,14 @@
             <th scope="col" class='text-center'>Executor</th>
 
             <th scope="col" class='text-center text-danger'>
-                <th scope="col" class='text-center'>Change</th>
+
 
             </th>
             </thead>
             <tbody>
             {% for step in session.steps %}
             <tr>
-                <td>{{ step.status_name }}</td>
+                <td>{{ form['status_'+(step.plan_id|string())] }}</td>
                 <td class='text-center'>{{ step.start_date }}</td>
                 <td class='text-center'></td>
                 <td class='text-center'>{{ step.planned_end }}</td>

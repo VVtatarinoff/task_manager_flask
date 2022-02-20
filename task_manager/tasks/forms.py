@@ -10,7 +10,8 @@ from wtforms.validators import (Length, DataRequired,
 from task_manager.auths.models import User
 from task_manager.statuses.models import Status
 from task_manager.tags.models import Tag
-from task_manager.tasks.models import Task
+from task_manager.tasks.models import Task, Plan
+from task_manager.tasks.session import SessionPlan
 
 
 def check_data_not_in_past():
@@ -138,3 +139,12 @@ class EditTaskForm(TaskBody, StepTask):
             tags = list(map(lambda x: str(x.id), task.tags))
             session['tags'] = tags
         self.tags.data = self.tags.data or tags
+        self.set_steps_from_session()
+
+    def set_steps_from_session(self):
+        steps = SessionPlan()
+        for step in steps.raw_steps:
+            field = StringField('', default=step['status_name'])
+            bound_field = field.bind(self, f'status_{step["plan_id"]}')
+            bound_field.data = step['status_name']
+            setattr(self, f'status_{step["plan_id"]}', bound_field)

@@ -142,6 +142,10 @@ class SessionPlan(object):
                 step['actual_end_date'])
         return steps_copy
 
+    @property
+    def raw_steps(self):
+        return self.steps
+
     @staticmethod
     def convert_date_to_string(raw_date: date) -> str:
         if isinstance(raw_date, (date, datetime)):
