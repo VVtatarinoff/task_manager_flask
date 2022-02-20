@@ -69,7 +69,7 @@ def update_task(id):
     if msg := get_error_modifing_task(task):
         flash(msg, 'warning')
         return redirect(url_for("tasks.show_task_detail", id=id))
-    steps = SessionPlan(new=not request.form, plan=task.plan)
+    steps = SessionPlan(new=not request.form, plan=task.plan) # noqa 841
     form = EditTaskForm(task)
     context = dict()
     context['form'] = form

@@ -10,7 +10,7 @@ from wtforms.validators import (Length, DataRequired,
 from task_manager.auths.models import User
 from task_manager.statuses.models import Status
 from task_manager.tags.models import Tag
-from task_manager.tasks.models import Task, Plan
+from task_manager.tasks.models import Task
 from task_manager.tasks.session import SessionPlan
 
 
