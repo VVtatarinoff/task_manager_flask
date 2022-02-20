@@ -154,7 +154,7 @@ class SessionPlan(object):
 
     @staticmethod
     def convert_string_to_date(date_string: str) -> date:
-        if date_string is None or date_string == 'None':
+        if not date_string or date_string == 'None':
             return
         day, month, year = tuple(map(int, date_string.split('-')))
         return date(year, month, day)

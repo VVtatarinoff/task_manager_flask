@@ -143,8 +143,10 @@ class EditTaskForm(TaskBody, StepTask):
 
     def set_steps_from_session(self):
         steps = SessionPlan()
-        for step in steps.raw_steps:
-            field = StringField('', default=step['status_name'])
-            bound_field = field.bind(self, f'status_{step["plan_id"]}')
-            bound_field.data = step['status_name']
-            setattr(self, f'status_{step["plan_id"]}', bound_field)
+        for step in steps.plan:
+            field = DateField('Start date',
+                              validators=[
+                                  check_data_not_in_past()])
+            bound_field = field.bind(self, f'start_date_{step["plan_id"]}')
+            bound_field.data = step['start_date']
+            setattr(self, f'start_date_{step["plan_id"]}', bound_field)

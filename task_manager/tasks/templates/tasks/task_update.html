@@ -43,8 +43,8 @@
             <tbody>
             {% for step in session.steps %}
             <tr>
-                <td>{{ form['status_'+(step.plan_id|string())] }}</td>
-                <td class='text-center'>{{ step.start_date }}</td>
+                <td>{{ step.status_name }}</td>
+                <td class='text-center'>{{ form['start_date_'+(step.plan_id|string())] }}</td>
                 <td class='text-center'></td>
                 <td class='text-center'>{{ step.planned_end }}</td>
                 <td class='text-center'></td>
