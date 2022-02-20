@@ -1,5 +1,5 @@
 import copy
-from datetime import date
+from datetime import date, datetime
 from itertools import chain
 
 from flask import session
@@ -29,9 +29,9 @@ class SessionPlan(object):
 
     def __init__(self, new: bool = False, plan: Plan = None) -> None:
         if new:
-            self.steps = []
-        elif plan:
-            self.extract_steps_from_plan()
+            session['steps'] = []
+        if plan:
+            self.extract_steps_from_plan(plan)
         else:
             self.steps = session['steps']
         self.save_to_session()
@@ -63,7 +63,7 @@ class SessionPlan(object):
             step_dict['actual_end_date'] = self.convert_date_to_string(
                 step.actual_end_date)
             step_dict['executor_id'] = step.executor_id
-            step_dict['executor_name'] = step.user_executor
+            step_dict['executor_name'] = step.executor.name
             self.steps += [step_dict]
         self._sort_steps()
 
@@ -78,6 +78,7 @@ class SessionPlan(object):
         Returns:
             None
         """
+
         def get_str_date_from_field(field_name):
             if field_name in form:
                 return self.convert_date_to_string(form[field_name].data)
@@ -143,7 +144,9 @@ class SessionPlan(object):
 
     @staticmethod
     def convert_date_to_string(raw_date: date) -> str:
-        return raw_date.strftime('%d-%m-%Y')
+        if isinstance(raw_date, (date, datetime)):
+            return raw_date.strftime('%d-%m-%Y')
+        return ''
 
     @staticmethod
     def convert_string_to_date(date_string: str) -> date:

@@ -5,9 +5,10 @@ import urllib
 from flask import url_for, get_flashed_messages
 from flask_login import current_user
 
-from task_manager.tasks.models import Task, Plan  # noqa 401
+from task_manager.tasks.models import Task
+from task_manager.tasks.tasks import TITLES
 from task_manager.database.development_sql_fill import (
-    EXECUTOR)
+    EXECUTOR, MANAGER)
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,23 @@ def test_show_task_list_authorized(app, db_task, client):
     response = client.get(
         url_for('tasks.show_tasks_list'))
     assert response.status_code == 200
-    assert b'Tasks' in response.data
+    assert bytes(TITLES['list'], 'utf-8') in response.data
     tasks_count = Task.query.count()
     lines = response.data.count(b'</tr')
     assert lines == tasks_count
+
+
+@pytest.mark.parametrize('page_info', [('tasks.create_task', TITLES['create']),
+                                       ('tasks.update_task', TITLES['update'])])
+def test_authorized_manager_get(db_task, client, page_info):
+    page, title = page_info
+    client.post(url_for('users.login'),
+                data={'email': MANAGER['email'],
+                      'psw': MANAGER['password']})
+    _ = get_flashed_messages()
+    assert current_user.is_authenticated
+    response = client.get(
+        url_for(page, id=1))
+    _ = get_flashed_messages()
+    assert response.status_code == 200
+    assert bytes(title, 'utf-8') in response.data

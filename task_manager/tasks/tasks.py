@@ -1,8 +1,7 @@
 import logging
-from datetime import date
 
 from flask import (Blueprint, redirect, url_for, request,
-                   flash, render_template, session)
+                   flash, render_template)
 from flask_login import login_required
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
@@ -18,8 +17,14 @@ from task_manager.tasks.utils import (create_tasks_list,
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 
-
 logger = logging.getLogger(__name__)
+
+TITLES = {'list': 'Tasks',
+          'detail': 'Task page',
+          'update': 'Change task',
+          'delete': 'Delete task',
+          'create': 'Create task'
+          }
 
 
 @tasks_bp.route('/tasks')
@@ -29,7 +34,7 @@ def show_tasks_list():
     logger.debug(f'Task list request {request.method}, ars {request.args}')
     logger.debug(f'Task list request, tasks = {list(Task.query.all())}')
     context = dict()
-    context['title'] = 'Tasks'
+    context['title'] = TITLES['list']
     context['table_heads'] = ('Name', 'Executor', 'Manager', 'Planned start',
                               'Actual start', 'Planned end', 'Actual end',
                               'Current status')
@@ -52,7 +57,7 @@ def show_task_detail(id):
         return redirect(url_for('main.index'))
     context = dict()
     context['task'] = task
-    context['title'] = 'Task page'
+    context['title'] = TITLES['detail']
     return render_template('tasks/task_profile.html', **context)
 
 
@@ -64,24 +69,11 @@ def update_task(id):
     if msg := get_error_modifing_task(task):
         flash(msg, 'warning')
         return redirect(url_for("tasks.show_task_detail", id=id))
-    if not request.form:
-        session['tags'] = []
-        steps = []
-        for step in task.plan:
-            step_dict = dict()
-            step_dict['id'] = step.id
-            step_dict['step_id'] = step.status.id
-            step_dict['step_name'] = step.status.name
-            step_dict['start'] = step.start_date.toordinal()
-            step_dict['end'] = step.planned_end.toordinal()
-            steps += [step_dict]
-        session['steps'] = steps
+    # steps = SessionPlan(new=not request.form, plan=task.plan)
     form = EditTaskForm(task)
     context = dict()
     context['form'] = form
-    context['title'] = 'Change task'
-    context['steps'] = normalize_steps_set(session['steps'])
-
+    context['title'] = TITLES['update']
     return render_template('tasks/task_update.html', **context)
 
 
@@ -103,16 +95,9 @@ def delete_task(id):
         flash('Database error during delete transaction', 'danger')
     else:
         flash('The task was successfully deleted', 'success')
+    context = dict()
+    context['title'] = TITLES['delete']
     return redirect(url_for("tasks.show_tasks_list"))
-
-
-def convert_date_to_string(raw_date: date) -> str:
-    return raw_date.strftime('%d-%m-%Y')
-
-
-def convert_string_to_date(date_string: str) -> date:
-    day, month, year = tuple(map(int, date_string.split('-')))
-    return date(year, month, day)
 
 
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
@@ -138,18 +123,5 @@ def create_task():
             flash('Error adding to database', 'danger')
     context = dict()
     context['form'] = form
-    context['title'] = 'Create task'
+    context['title'] = TITLES['create']
     return render_template('tasks/task_creation.html', **context)
-
-
-def normalize_steps_set(steps):
-    normalized = []
-
-    for step in steps:
-        normalized += [{'id': int(step['id']),
-                        'step_id': int(step['step_id']),
-                        'step_name': step['step_name'],
-                        'start': convert_string_to_date(step['start']),
-                        'end': convert_string_to_date(step['end'])}]
-    normalized.sort(key=lambda x: x['start'])
-    return normalized
