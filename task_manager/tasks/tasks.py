@@ -109,7 +109,7 @@ def delete_task(id):
 @login_required
 @permission_required(Permission.MANAGE)
 def create_task():
-    steps = SessionPlan(new=request.form)
+    steps = SessionPlan(request.form)
     form = CreateTask()
     if form.add_step.data and form.check_adding_step_form():
         step_id = int(form.status_name.data)

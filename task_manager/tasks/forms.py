@@ -164,7 +164,8 @@ class EditTaskForm(TaskBody, StepTask):
         for field in fields:
             success = success and field.validate(self)
         tasks_with_same_name = list(
-                Task.query.filter(and_(Task.name == self.task_name.data, Task.id != self.task.id)).all())
+            Task.query.filter(and_(Task.name == self.task_name.data,
+                                   Task.id != self.task.id)).all())
         if success and tasks_with_same_name:
             self.task_name.errors = [
                 "Task with such name exists in database"]
