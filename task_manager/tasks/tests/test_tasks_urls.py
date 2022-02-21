@@ -1,6 +1,6 @@
 import logging
 
-import pytest  # noqa 401
+import pytest
 import urllib
 from flask import url_for, get_flashed_messages
 from flask_login import current_user
