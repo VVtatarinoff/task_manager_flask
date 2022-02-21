@@ -1,4 +1,5 @@
 from datetime import date
+from operator import and_
 
 from flask import session
 from flask_wtf import FlaskForm
@@ -111,12 +112,15 @@ class TaskBody(FlaskForm):
         self.tags.choices = [(None, '   <------>     ')] + list(
             map(lambda x: (x.id, x.name), tags))
 
-    def check_create_task_form(self, new=False):
+
+class CreateTask(TaskBody, StepTask):
+
+    def check_create_task_form(self):
         fields = [self.tags, self.task_name, self.description, self.executor]
         success = True
         for field in fields:
             success = success and field.validate(self)
-        if success and new and list(
+        if success and list(
                 Task.query.filter_by(name=self.task_name.data).all()):
             self.task_name.errors = [
                 "Task with such name exists in database"]
@@ -124,13 +128,11 @@ class TaskBody(FlaskForm):
         return success
 
 
-class CreateTask(TaskBody, StepTask):
-    pass
-
-
 class EditTaskForm(TaskBody, StepTask):
+
     def __init__(self, task, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.id = task.id
         self.task_name.data = self.task_name.data or task.name
         self.description.data = self.description.data or task.description
         self.executor.data = self.executor.data or str(task.executor_id)
@@ -156,3 +158,15 @@ class EditTaskForm(TaskBody, StepTask):
             set_bound_date_field('start_date')
             set_bound_date_field('planned_end')
 
+    def check_update_task_form(self):
+        fields = [self.tags, self.task_name, self.description, self.executor]
+        success = True
+        for field in fields:
+            success = success and field.validate(self)
+        tasks_with_same_name = list(
+                Task.query.filter(and_(Task.name == self.task_name.data, Task.id != self.id)).all())
+        if success and tasks_with_same_name:
+            self.task_name.errors = [
+                "Task with such name exists in database"]
+            success = False
+        return success

@@ -28,10 +28,10 @@ class SessionPlan(object):
     """
 
     def __init__(self, new: bool = False, plan: Plan = None) -> None:
-        if new:
-            session['steps'] = []
-        if plan:
+        if plan and new:
             self.extract_steps_from_plan(plan)
+        elif new:
+            self.steps = []
         else:
             self.steps = session['steps']
         self.save_to_session()

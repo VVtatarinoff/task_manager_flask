@@ -3,7 +3,7 @@
 <form method="post">
     {{ form.hidden_tag() }}
 
-     {% for field in form if field.name not in ['csrf_token', 'submit', 'add_step', 'status_name', 'start_date', 'planned_end', 'del_step', 'del_option'] %}
+     {% for field in form if field.name not in ['csrf_token', 'submit', 'add_step', 'status_name', 'start_date', 'planned_end', 'del_step', 'del_option', 'save'] %}
         <div class="form-group">
         {{ field.label(class="form-label", size=20 ) }}
             {% if field.errors %}

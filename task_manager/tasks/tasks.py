@@ -71,6 +71,11 @@ def update_task(id):
         return redirect(url_for("tasks.show_task_detail", id=id))
     steps = SessionPlan(new=not request.form, plan=task.plan) # noqa 841
     form = EditTaskForm(task)
+    if form.del_step.data and form.del_option.raw_data:
+        steps.remove_step_from_session(form.del_option.raw_data)
+        form.del_option.raw_data = []
+    if form.submit.data and form.check_update_task_form():
+        pass
     context = dict()
     context['form'] = form
     context['title'] = TITLES['update']
@@ -113,7 +118,7 @@ def create_task():
     if form.del_step.data and form.del_option.raw_data:
         steps.remove_step_from_session(form.del_option.raw_data)
         form.del_option.raw_data = []
-    if form.submit.data and form.check_create_task_form(new=True):
+    if form.submit.data and form.check_create_task_form():
         if not steps:
             flash("Provide a plan for task", 'danger')
         elif upload_task(form):
