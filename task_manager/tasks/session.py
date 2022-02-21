@@ -57,7 +57,8 @@ class SessionPlan(object):
             step_dict['status_name'] = step.status.name
             step_dict['start_date'] = self.convert_date_to_string(
                 step.start_date)
-            step_dict['actual_start'] = step.actual_start
+            step_dict['actual_start'] = self.convert_date_to_string(
+                step.actual_start)
             step_dict['planned_end'] = self.convert_date_to_string(
                 step.planned_end)
             step_dict['actual_end_date'] = self.convert_date_to_string(

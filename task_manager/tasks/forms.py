@@ -142,11 +142,17 @@ class EditTaskForm(TaskBody, StepTask):
         self.set_steps_from_session()
 
     def set_steps_from_session(self):
-        steps = SessionPlan()
-        for step in steps.plan:
-            field = DateField('Start date',
+
+        def set_bound_date_field(name):
+            field = DateField(name,
                               validators=[
                                   check_data_not_in_past()])
-            bound_field = field.bind(self, f'start_date_{step["plan_id"]}')
-            bound_field.data = step['start_date']
-            setattr(self, f'start_date_{step["plan_id"]}', bound_field)
+            bound_field = field.bind(self, f'{name}_{step["plan_id"]}')
+            bound_field.data = step[name]
+            setattr(self, f'{name}_{step["plan_id"]}', bound_field)
+
+        steps = SessionPlan()
+        for step in steps.plan:
+            set_bound_date_field('start_date')
+            set_bound_date_field('planned_end')
+

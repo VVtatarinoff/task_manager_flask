@@ -45,10 +45,10 @@
             <tr>
                 <td>{{ step.status_name }}</td>
                 <td class='text-center'>{{ form['start_date_'+(step.plan_id|string())] }}</td>
-                <td class='text-center'></td>
-                <td class='text-center'>{{ step.planned_end }}</td>
-                <td class='text-center'></td>
-                <td class='text-center'></td>
+                <td class='text-center'>{{ step.actual_start }}</td>
+                <td class='text-center'>{{ form['planned_end_'+(step.plan_id|string())] }}</td>
+                <td class='text-center'>{{ step.actual_end_date }}</td>
+                <td class='text-center'>{{ step.executor_name }}</td>
                 <td class='text-center text-danger'>
                     <input type="checkbox" id="del_option" name="del_option" value={{ step.plan_id }} >
 
