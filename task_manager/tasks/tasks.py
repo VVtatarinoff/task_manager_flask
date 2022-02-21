@@ -69,8 +69,8 @@ def update_task(id):
     if msg := get_error_modifing_task(task):
         flash(msg, 'warning')
         return redirect(url_for("tasks.show_task_detail", id=id))
-    steps = SessionPlan(new=not request.form, plan=task.plan) # noqa 841
-    form = EditTaskForm(task)
+    steps = SessionPlan(request.form, plan=task.plan.all()) # noqa 841
+    form = EditTaskForm(task, request.form)
     if form.del_step.data and form.del_option.raw_data:
         steps.remove_step_from_session(form.del_option.raw_data)
         form.del_option.raw_data = []
@@ -109,7 +109,7 @@ def delete_task(id):
 @login_required
 @permission_required(Permission.MANAGE)
 def create_task():
-    steps = SessionPlan(new=not request.form)
+    steps = SessionPlan(new=request.form)
     form = CreateTask()
     if form.add_step.data and form.check_adding_step_form():
         step_id = int(form.status_name.data)

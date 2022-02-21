@@ -27,14 +27,23 @@ class SessionPlan(object):
         'executor_name' - username, corresponding to executor_id
     """
 
-    def __init__(self, new: bool = False, plan: Plan = None) -> None:
-        if plan and new:
+    def __init__(self, form, plan: Plan = None) -> None:
+        if plan and not form:
             self.extract_steps_from_plan(plan)
-        elif new:
+        elif not form:
             self.steps = []
         else:
             self.steps = session['steps']
+            self.update_session_from_form(form)
         self.save_to_session()
+
+    def update_session_from_form(self, form):
+        for step in self.steps:
+            if form[f'start_date_{step["plan_id"]}']:
+                step['start_date'] = self.convert_date_to_string(
+                    form[f'start_date_{step["plan_id"]}'])
+                step['planned_end'] = self.convert_date_to_string(
+                    form[f'planned_end_{step["plan_id"]}'])
 
     def save_to_session(self):
         session['steps'] = self.steps

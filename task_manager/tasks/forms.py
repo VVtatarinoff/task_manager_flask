@@ -130,9 +130,9 @@ class CreateTask(TaskBody, StepTask):
 
 class EditTaskForm(TaskBody, StepTask):
 
-    def __init__(self, task, *args, **kwargs):
+    def __init__(self, task, request_form, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.id = task.id
+        self.task = task
         self.task_name.data = self.task_name.data or task.name
         self.description.data = self.description.data or task.description
         self.executor.data = self.executor.data or str(task.executor_id)
@@ -141,9 +141,9 @@ class EditTaskForm(TaskBody, StepTask):
             tags = list(map(lambda x: str(x.id), task.tags))
             session['tags'] = tags
         self.tags.data = self.tags.data or tags
-        self.set_steps_from_session()
+        self.set_steps_from_session(request_form)
 
-    def set_steps_from_session(self):
+    def set_steps_from_session(self, form):
 
         def set_bound_date_field(name):
             field = DateField(name,
@@ -153,7 +153,7 @@ class EditTaskForm(TaskBody, StepTask):
             bound_field.data = step[name]
             setattr(self, f'{name}_{step["plan_id"]}', bound_field)
 
-        steps = SessionPlan()
+        steps = SessionPlan(form, plan=self.task.plan.all())
         for step in steps.plan:
             set_bound_date_field('start_date')
             set_bound_date_field('planned_end')
@@ -164,7 +164,7 @@ class EditTaskForm(TaskBody, StepTask):
         for field in fields:
             success = success and field.validate(self)
         tasks_with_same_name = list(
-                Task.query.filter(and_(Task.name == self.task_name.data, Task.id != self.id)).all())
+                Task.query.filter(and_(Task.name == self.task_name.data, Task.id != self.task.id)).all())
         if success and tasks_with_same_name:
             self.task_name.errors = [
                 "Task with such name exists in database"]
