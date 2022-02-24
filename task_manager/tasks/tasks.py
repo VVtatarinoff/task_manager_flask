@@ -139,6 +139,8 @@ def create_task():
     form = CreateTask()
     if form.add_step_button.data:
         form.add_step(0, new=True)
+    if form.del_step_button.data and form.del_option.raw_data:
+        form.delete_step()
     if form.submit.data and form.check_create_task_form():
         pass
     context = dict()

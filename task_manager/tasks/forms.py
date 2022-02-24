@@ -234,7 +234,7 @@ class CreateTask(TaskBody):
             kwargs = dict(map(lambda x: (x, request.form[x] if (x in request.form.keys()) else None), step_fields))
             self.add_step(id, **kwargs)
 
-    def add_step(self, id, new= False, **kwargs):
+    def add_step(self, id, new=False, **kwargs):
 
         def get_next_id():
             if self.STATUS_ID in kwargs:
@@ -242,6 +242,7 @@ class CreateTask(TaskBody):
             else:
                 id = min([0] + self.ids) - 1
             return id
+
         if new:
             id = get_next_id()
             self.ids.append(id)
@@ -256,9 +257,18 @@ class CreateTask(TaskBody):
                 self.set_bound_field(name=name, data=data, field_type=StringField)
             else:
                 self.set_bound_field(name=name, data=data, field_type=DateField,
-                                 validators=[
-                                     check_data_not_in_past()])
+                                     validators=[
+                                         check_data_not_in_past()])
 
+    def delete_step(self):
+        for id in self.del_option.raw_data:
+            names = self.get_names_step_fields(id)
+            for name in names:
+                delattr(self, name)
+        ids = set(self.ids)
+        ids.difference_update(set(map(int, self.del_option.raw_data)))
+        self.ids = list(ids)
+        self.del_option.choices = []
 
     def check_create_task_form(self):
         fields = [self.tags, self.task_name, self.description, self.executor]
