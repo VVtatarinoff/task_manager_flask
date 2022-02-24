@@ -209,6 +209,7 @@ class CreateTask(TaskBody):
         # args = list(self.__dict__.keys())
         reg_exp = f'(?<={self.STATUS_ID}_)(-)?\d+'
         self.ids = list(map(lambda y: y[0], filter(bool, (map(lambda x: re.search(reg_exp, x), args)))))
+        self.ids = list(map(int, self.ids))
 
     def set_bound_field(self, name='default', field_type=StringField, data=None, **kwargs):
         field = field_type(name, **kwargs)
@@ -233,16 +234,17 @@ class CreateTask(TaskBody):
             kwargs = dict(map(lambda x: (x, request.form[x] if (x in request.form.keys()) else None), step_fields))
             self.add_step(id, **kwargs)
 
-    def add_step(self, id, **kwargs):
+    def add_step(self, id, new= False, **kwargs):
 
-        # def get_next_id():
-        #     if self.STATUS_ID in kwargs:
-        #         id = kwargs[self.STATUS_ID] - 1
-        #     else:
-        #         id = min([0] + self.ids) - 1
-        #     return id
-
-        # id = get_next_id()
+        def get_next_id():
+            if self.STATUS_ID in kwargs:
+                id = kwargs[self.STATUS_ID] - 1
+            else:
+                id = min([0] + self.ids) - 1
+            return id
+        if new:
+            id = get_next_id()
+            self.ids.append(id)
         names = self.get_names_step_fields(id)
         for name in names:
             data = kwargs.get(name, None)
