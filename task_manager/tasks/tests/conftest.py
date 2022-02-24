@@ -31,3 +31,6 @@ def db_task(app):
             for sql in SQLS:
                 con.execute(sql)
         yield db
+
+def session_init(db_task):
+    pass

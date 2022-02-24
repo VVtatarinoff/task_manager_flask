@@ -1,7 +1,8 @@
+import re
 from datetime import date
 from operator import and_
 
-from flask import session
+from flask import session, request
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, SelectField,
                      SelectMultipleField, DateField)
@@ -35,7 +36,7 @@ def check_selected(msg):
 
 
 def check_not_empty(msg=''):
-    def _is_empty(form, field):
+    def _is_empty(_, field):
         if not field.data:
             raise ValidationError(msg)
 
@@ -113,7 +114,16 @@ class TaskBody(FlaskForm):
             map(lambda x: (x.id, x.name), tags))
 
 
-class CreateTask(TaskBody, StepTask):
+class CreateTask2(TaskBody, StepTask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.new_task = Task()
+        self.new_task.name = self.task_name.data
+        self.new_task.description = self.description.data
+        self.new_task.executor_id = self.executor.data
+        self.new_tags = Tag().query.filter(Tag.id.in_(self.tags.raw_data)).all()
+        self.new_task.tags = self.new_tags
+        n = 1
 
     def check_create_task_form(self):
         fields = [self.tags, self.task_name, self.description, self.executor]
@@ -167,6 +177,94 @@ class EditTaskForm(TaskBody, StepTask):
             Task.query.filter(and_(Task.name == self.task_name.data,
                                    Task.id != self.task.id)).all())
         if success and tasks_with_same_name:
+            self.task_name.errors = [
+                "Task with such name exists in database"]
+            success = False
+        return success
+
+
+class CreateTask(TaskBody):
+    STATUS_ID = 'status_id'
+    add_step_button = SubmitField('Add step')
+    del_step_button = SubmitField('X')
+    del_option = SelectField('choice to delete')
+
+    def __init__(self, task: Task = None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        statuses = Status.query.all()
+        self.step_choices = [(None, '   <------>     ')] + list(
+            map(lambda x: (x.id, x.name), statuses))
+        self.del_option.choices = self.del_option.choices or []
+        if task:
+            self.init_from_task(task)
+            return
+        if request.form:
+            self.init_from_form()
+        else:
+            self.ids = [-1]
+            self.add_step(-1)
+
+    def set_ids(self, args):
+        # args = list(self.__dict__.keys())
+        reg_exp = f'(?<={self.STATUS_ID}_)(-)?\d+'
+        self.ids = list(map(lambda y: y[0], filter(bool, (map(lambda x: re.search(reg_exp, x), args)))))
+
+    def set_bound_field(self, name='default', field_type=StringField, data=None, **kwargs):
+        field = field_type(name, **kwargs)
+        bound_field = field.bind(self, name)
+        bound_field.data = data
+        setattr(self, name, bound_field)
+
+    def init_from_task(self, task):
+        pass
+
+    def get_names_step_fields(self, id):
+        return [f'{self.STATUS_ID}_{id}', f'start_date_{id}',
+                f'actual_start_{id}', f'planned_end_{id}',
+                f'actual_end_date_{id}', f'executor_name_{id}']
+
+    def init_from_form(self):
+        fields = request.form
+        self.set_ids(list(fields.keys()))
+
+        for id in self.ids:
+            step_fields = self.get_names_step_fields(id)
+            kwargs = dict(map(lambda x: (x, request.form[x] if (x in request.form.keys()) else None), step_fields))
+            self.add_step(id, **kwargs)
+
+    def add_step(self, id, **kwargs):
+
+        # def get_next_id():
+        #     if self.STATUS_ID in kwargs:
+        #         id = kwargs[self.STATUS_ID] - 1
+        #     else:
+        #         id = min([0] + self.ids) - 1
+        #     return id
+
+        # id = get_next_id()
+        names = self.get_names_step_fields(id)
+        for name in names:
+            data = kwargs.get(name, None)
+            if self.STATUS_ID in name:
+                self.set_bound_field(name=name, field_type=SelectField,
+                                     data=data, validators=[check_selected(
+                        "Choose the step to include")], choices=self.step_choices)
+            elif 'executor_name' in name:
+                self.set_bound_field(name=name, data=data, field_type=StringField)
+            else:
+                self.set_bound_field(name=name, data=data, field_type=DateField,
+                                 validators=[
+                                     check_data_not_in_past()])
+
+
+    def check_create_task_form(self):
+        fields = [self.tags, self.task_name, self.description, self.executor]
+        success = True
+        for field in fields:
+            success = success and field.validate(self)
+        if success and list(
+                Task.query.filter_by(name=self.task_name.data).all()):
             self.task_name.errors = [
                 "Task with such name exists in database"]
             success = False

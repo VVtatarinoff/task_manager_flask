@@ -69,7 +69,7 @@ def update_task(id):
     if msg := get_error_modifing_task(task):
         flash(msg, 'warning')
         return redirect(url_for("tasks.show_task_detail", id=id))
-    steps = SessionPlan(request.form, plan=task.plan.all()) # noqa 841
+    steps = SessionPlan(request.form, plan=task.plan.all())  # noqa 841
     form = EditTaskForm(task, request.form)
     if form.del_step.data and form.del_option.raw_data:
         steps.remove_step_from_session(form.del_option.raw_data)
@@ -105,10 +105,10 @@ def delete_task(id):
     return redirect(url_for("tasks.show_tasks_list"))
 
 
-@tasks_bp.route('/task_create', methods=['GET', 'POST'])
+@tasks_bp.route('/task_create2', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
-def create_task():
+def create_task2():
     steps = SessionPlan(request.form)
     form = CreateTask()
     if form.add_step.data and form.check_adding_step_form():
@@ -119,13 +119,26 @@ def create_task():
         steps.remove_step_from_session(form.del_option.raw_data)
         form.del_option.raw_data = []
     if form.submit.data and form.check_create_task_form():
-        if not steps:
+        if not steps.raw_steps:
             flash("Provide a plan for task", 'danger')
         elif upload_task(form):
             flash('Task successfully created', 'success')
             return redirect(url_for('tasks.show_tasks_list'))
         else:
             flash('Error adding to database', 'danger')
+    context = dict()
+    context['form'] = form
+    context['title'] = TITLES['create']
+    return render_template('tasks/task_creation.html', **context)
+
+
+@tasks_bp.route('/task_create', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE)
+def create_task():
+    form = CreateTask()
+    if form.submit.data and form.check_create_task_form():
+        pass
     context = dict()
     context['form'] = form
     context['title'] = TITLES['create']

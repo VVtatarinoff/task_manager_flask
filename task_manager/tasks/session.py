@@ -33,13 +33,13 @@ class SessionPlan(object):
         elif not form:
             self.steps = []
         else:
-            self.steps = session['steps']
+            self.steps = session.get('steps', [])
             self.update_session_from_form(form)
         self.save_to_session()
 
     def update_session_from_form(self, form):
         for step in self.steps:
-            if form[f'start_date_{step["plan_id"]}']:
+            if form.get(f'start_date_{step["plan_id"]}', None):
                 step['start_date'] = self.convert_date_to_string(
                     form[f'start_date_{step["plan_id"]}'])
                 step['planned_end'] = self.convert_date_to_string(

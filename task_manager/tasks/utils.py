@@ -57,7 +57,7 @@ def upload_task(form):
     executor_id = form.executor.data
     task_name = form.task_name.data
     task_description = form.description.data
-    steps = SessionPlan().plan
+    steps = SessionPlan(form=form).plan
     task_start = sorted(list(map(lambda x: x['start_date'], steps)))[0]
     task_planned_end = sorted(list(map(lambda x: x['planned_end'], steps)))[0]
     task = Task(name=task_name, description=task_description,
