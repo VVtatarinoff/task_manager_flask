@@ -186,7 +186,7 @@ class EditTaskForm(TaskBody, StepTask):
 class CreateTask(TaskBody):
     STATUS_ID = 'status_id'
     add_step_button = SubmitField('Add step')
-    del_step_button = SubmitField('X')
+    del_step_button = SubmitField('Delete selected')
     del_option = SelectField('choice to delete')
 
     def __init__(self, task: Task = None, *args, **kwargs):
