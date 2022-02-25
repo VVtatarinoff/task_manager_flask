@@ -6,13 +6,13 @@ from flask_login import login_required
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager import db
-from task_manager.tasks.forms import CreateTask
+from task_manager.tasks.forms import CreateTask, UpdateTask
 from task_manager.tasks.models import Task
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
 from task_manager.tasks.utils import (create_tasks_list,
                                       upload_task,
-                                      get_error_modifing_task)
+                                      get_error_modifing_task, change_task)
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 
@@ -63,18 +63,33 @@ def show_task_detail(id):
 @tasks_bp.route('/task_update/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
-def update_task(id):
+def update_task(id):    # noqa 901
     task = Task.query.filter_by(id=id).one()
     if msg := get_error_modifing_task(task):
         flash(msg, 'warning')
         return redirect(url_for("tasks.show_task_detail", id=id))
-    # steps = SessionPlan(request.form, plan=task.plan.all())  # noqa 841
-    form = CreateTask(task=task)
-    # if form.del_step.data and form.del_option.raw_data:
-    #     steps.remove_step_from_session(form.del_option.raw_data)
-    #     form.del_option.raw_data = []
-    # if form.submit.data and form.check_update_task_form():
-    #     pass
+    if request.method == "GET":
+        form = UpdateTask(task=task)
+    else:
+        form = UpdateTask()
+    if form.add_step_button.data:
+        form.add_step(0, new=True)
+    if form.del_step_button.data and form.del_option.raw_data:
+        form.delete_step()
+    if form.submit.data and form.check_create_task_form():
+        task_check_ids = list(
+            map(lambda x: x.id,
+                Task.query.filter_by(name=form.task_name.data).all()))
+        task_dublicate_name = list(
+            filter(lambda x: x != task.id, task_check_ids))
+        if task_dublicate_name:
+            form.task_name.errors = [
+                "Task with such name exists in database"]
+        elif change_task(task, form):
+            flash('Task successfully updated', 'success')
+            return redirect(url_for('tasks.show_tasks_list'))
+        else:
+            flash('Error adding to database', 'danger')
     context = dict()
     context['form'] = form
     context['title'] = TITLES['update']
@@ -114,7 +129,10 @@ def create_task():
     if form.del_step_button.data and form.del_option.raw_data:
         form.delete_step()
     if form.submit.data and form.check_create_task_form():
-        if upload_task(form):
+        if list(Task.query.filter_by(name=form.task_name.data).all()):
+            form.task_name.errors = [
+                "Task with such name exists in database"]
+        elif upload_task(form):
             flash('Task successfully created', 'success')
             return redirect(url_for('tasks.show_tasks_list'))
         else:

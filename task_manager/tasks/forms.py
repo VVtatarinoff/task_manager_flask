@@ -98,16 +98,7 @@ class CreateTask(TaskBody):
         self.ids = list(map(int, self.ids))
 
     def init_from_task(self, task: Task):
-        self.task_name.data = task.name
-        self.description.data = task.description
-        self.executor.data = str(task.executor_id)
-        tags = list(map(lambda x: str(x.id), task.tags))
-        self.tags.data = tags
-        self.ids = list(map(lambda x: x.id, task.plan))
-        for id in self.ids:
-            step = Plan.query.filter_by(id=id).one()
-            kwargs= dict(map(lambda x: (f'{x}_{id}',step.__dict__[x]), step.__dict__))
-            self.set_step_fields(id, **kwargs)
+        pass
 
     def get_names_step_fields(self, id):
         return [f'{self.STATUS_ID}_{id}', f'start_date_{id}',
@@ -189,10 +180,6 @@ class CreateTask(TaskBody):
         success = super().validate_on_submit()
         if not success:
             return success
-        if list(Task.query.filter_by(name=self.task_name.data).all()):
-            self.task_name.errors = [
-                "Task with such name exists in database"]
-            return False
         statuses = list(
             map(lambda x: x.id, Status.query.all()))
         for id in self.ids:
@@ -221,3 +208,21 @@ class CreateTask(TaskBody):
                 ) + ["Start date greater than deadline"]
                 return False
         return success
+
+
+class UpdateTask(CreateTask):
+    submit = SubmitField('Update')
+
+    def init_from_task(self, task: Task):
+        self.task_name.data = task.name
+        self.description.data = task.description
+        self.executor.data = str(task.executor_id)
+        tags = list(map(lambda x: str(x.id), task.tags))
+        self.tags.data = tags
+        self.ids = list(map(lambda x: x.id, task.plan))
+        for id in self.ids:
+            step = Plan.query.filter_by(id=id).one()
+            kwargs = dict(
+                map(lambda x: (f'{x}_{id}', step.__dict__[x]),
+                    step.__dict__))
+            self.set_step_fields(id, **kwargs)

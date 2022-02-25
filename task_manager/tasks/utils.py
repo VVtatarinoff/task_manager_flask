@@ -99,6 +99,18 @@ def upload_task(form):
     return True
 
 
+def change_task(task, form):
+    try:
+        task.name = form.task_name.data
+        task.description = form.description.data
+        db.session.add(task)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return False
+    return True
+
+
 def get_error_modifing_task(task):
     msg = ''
     if task.actual_end_date:
