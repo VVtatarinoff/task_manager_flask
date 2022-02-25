@@ -1,13 +1,11 @@
 from datetime import date
 
-from flask import url_for, session
+from flask import url_for
 from flask_login import current_user
 
 import pytest
 
 from task_manager.database.development_sql_fill import MANAGER
-from task_manager.tasks.forms import CreateTask
-from task_manager.tasks.session import SessionPlan
 
 
 @pytest.mark.parametrize('page', ['tasks.create_task'])
@@ -23,4 +21,3 @@ def test_authorized_manager_add_step(db_task, client, page):
             'planned_end': date.today(),
             'add_step': True
         })
-    session_data = SessionPlan(form=CreateTask())

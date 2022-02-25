@@ -8,7 +8,6 @@ from task_manager import create_app, db
 from task_manager.database.development_sql_fill import (
     SQLS, )
 
-
 logger = logging.getLogger(__name__)
 CURRENT_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURRENT_DIR.parent.parent
@@ -31,6 +30,7 @@ def db_task(app):
             for sql in SQLS:
                 con.execute(sql)
         yield db
+
 
 def session_init(db_task):
     pass

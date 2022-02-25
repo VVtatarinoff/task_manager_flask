@@ -8,7 +8,6 @@ from task_manager import db
 from task_manager.statuses.models import Status
 from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Plan, IntermediateTaskTag, Task
-from task_manager.tasks.session import SessionPlan
 
 logger = logging.getLogger(__name__)
 

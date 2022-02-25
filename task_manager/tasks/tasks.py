@@ -6,11 +6,10 @@ from flask_login import login_required
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager import db
-from task_manager.tasks.forms import CreateTask, EditTaskForm
+from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Task
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
-from task_manager.tasks.session import SessionPlan
 from task_manager.tasks.utils import (create_tasks_list,
                                       upload_task,
                                       get_error_modifing_task)
@@ -69,17 +68,17 @@ def update_task(id):
     if msg := get_error_modifing_task(task):
         flash(msg, 'warning')
         return redirect(url_for("tasks.show_task_detail", id=id))
-    steps = SessionPlan(request.form, plan=task.plan.all())  # noqa 841
-    form = EditTaskForm(task, request.form)
-    if form.del_step.data and form.del_option.raw_data:
-        steps.remove_step_from_session(form.del_option.raw_data)
-        form.del_option.raw_data = []
-    if form.submit.data and form.check_update_task_form():
-        pass
+    # steps = SessionPlan(request.form, plan=task.plan.all())  # noqa 841
+    form = CreateTask(task=task)
+    # if form.del_step.data and form.del_option.raw_data:
+    #     steps.remove_step_from_session(form.del_option.raw_data)
+    #     form.del_option.raw_data = []
+    # if form.submit.data and form.check_update_task_form():
+    #     pass
     context = dict()
     context['form'] = form
     context['title'] = TITLES['update']
-    return render_template('tasks/task_update.html', **context)
+    return render_template('tasks/task_creation.html', **context)
 
 
 @tasks_bp.route('/task_delete/<int:id>', methods=['GET', 'POST'])
@@ -103,33 +102,6 @@ def delete_task(id):
     context = dict()
     context['title'] = TITLES['delete']
     return redirect(url_for("tasks.show_tasks_list"))
-
-
-@tasks_bp.route('/task_create2', methods=['GET', 'POST'])
-@login_required
-@permission_required(Permission.MANAGE)
-def create_task2():
-    steps = SessionPlan(request.form)
-    form = CreateTask()
-    if form.add_step.data and form.check_adding_step_form():
-        step_id = int(form.status_name.data)
-        steps.add_step_from_form(status_id=step_id, form=form)
-        form.clear_step_data()
-    if form.del_step.data and form.del_option.raw_data:
-        steps.remove_step_from_session(form.del_option.raw_data)
-        form.del_option.raw_data = []
-    if form.submit.data and form.check_create_task_form():
-        if not steps.raw_steps:
-            flash("Provide a plan for task", 'danger')
-        elif upload_task(form):
-            flash('Task successfully created', 'success')
-            return redirect(url_for('tasks.show_tasks_list'))
-        else:
-            flash('Error adding to database', 'danger')
-    context = dict()
-    context['form'] = form
-    context['title'] = TITLES['create']
-    return render_template('tasks/task_creation.html', **context)
 
 
 @tasks_bp.route('/task_create', methods=['GET', 'POST'])
