@@ -297,20 +297,31 @@ class CreateTask(TaskBody):
             self.task_name.errors = [
                 "Task with such name exists in database"]
             return False
+        statuses = list(
+            map(lambda x: x.id, Status.query.all()))
         for id in self.ids:
-            if not self.__dict__[f'planned_end_{id}'].data:
-                self.__dict__[f'planned_end_{id}'].errors = list(
-                    *self.__dict__[f'planned_end_{id}'].errors
+            end = f'planned_end_{id}'
+            start = f'start_date_{id}'
+            step = f'{self.STATUS_ID}_{id}'
+            if self.__dict__[step].data == 'None' or int(self.__dict__[step].data) not in statuses:
+                self.__dict__[step].errors = list(
+                    *self.__dict__[step].errors
+                ) + ["Choose the step"]
+                return False
+            if not self.__dict__[end].data:
+                self.__dict__[end].errors = list(
+                    *self.__dict__[end].errors
                 ) + ["Choose the planned deadline"]
                 return False
-            if not self.__dict__[f'start_date_{id}'].data:
-                self.__dict__[f'start_date_{id}'].errors = list(
-                    *self.__dict__[f'start_date_{id}'].errors
+            if not self.__dict__[start].data:
+                self.__dict__[start].errors = list(
+                    *self.__dict__[start].errors
                 ) + ["Choose thee planned start date"]
                 return False
-            if (self.__dict__[f'planned_end_{id}'].data < self.__dict__[f'start_date_{id}'].data):
-                self.__dict__[f'start_date_{id}'].errors = list(
-                    *self.__dict__[f'start_date_{id}']  .errors
+            if (self.__dict__[end].data <
+                    self.__dict__[start].data):
+                self.__dict__[start].errors = list(
+                    *self.__dict__[start].errors
                 ) + ["Start date greater than deadline"]
                 return False
         return success
