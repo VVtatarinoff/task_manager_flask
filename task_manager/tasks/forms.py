@@ -97,8 +97,7 @@ class CreateTask(TaskBody):
             self.add_step(-1)
 
     def set_ids(self, args):
-        # args = list(self.__dict__.keys())
-        reg_exp = f'(?<={self.STATUS_ID}_)(-)?\d+'  # noqa 605
+        reg_exp = f'(?<={self.STATUS_ID}_)' + r'(-)?\d+'
         self.ids = list(map(lambda y: y[0],
                             filter(
                                 bool,
