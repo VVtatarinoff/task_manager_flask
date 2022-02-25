@@ -142,7 +142,12 @@ def create_task():
     if form.del_step_button.data and form.del_option.raw_data:
         form.delete_step()
     if form.submit.data and form.check_create_task_form():
-        pass
+        if upload_task(form):
+            flash('Task successfully created', 'success')
+            return redirect(url_for('tasks.show_tasks_list'))
+        else:
+            flash('Error adding to database', 'danger')
+
     context = dict()
     context['form'] = form
     context['title'] = TITLES['create']

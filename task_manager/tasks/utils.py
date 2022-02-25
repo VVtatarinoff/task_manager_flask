@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from task_manager import db
 from task_manager.statuses.models import Status
+from task_manager.tasks.forms import CreateTask
 from task_manager.tasks.models import Plan, IntermediateTaskTag, Task
 from task_manager.tasks.session import SessionPlan
 
@@ -52,12 +53,24 @@ def get_current_status(steps):
     return 'No status'
 
 
+def get_plan_from_form(form: CreateTask):
+    steps = []
+    for id in form.ids:
+        step = dict()
+        step['start_date'] = form.__dict__[f'start_date_{id}'].data
+        step['plan_id'] = int(id)
+        step['planned_end'] = form.__dict__[f'planned_end_{id}'].data
+        step['status_id'] = form.__dict__[f'status_id_{id}'].data
+        steps.append(step)
+    return steps
+
+
 def upload_task(form):
     manager_id = current_user.id
     executor_id = form.executor.data
     task_name = form.task_name.data
     task_description = form.description.data
-    steps = SessionPlan(form=form).plan
+    steps = get_plan_from_form(form)
     task_start = sorted(list(map(lambda x: x['start_date'], steps)))[0]
     task_planned_end = sorted(list(map(lambda x: x['planned_end'], steps)))[0]
     task = Task(name=task_name, description=task_description,
