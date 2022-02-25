@@ -11,7 +11,7 @@ from wtforms.validators import (Length, DataRequired,
 from task_manager.auths.models import User
 from task_manager.statuses.models import Status
 from task_manager.tags.models import Tag
-from task_manager.tasks.models import Task
+from task_manager.tasks.models import Task, Plan
 
 
 def check_data_not_in_past():
@@ -67,13 +67,6 @@ class TaskBody(FlaskForm):
             map(lambda x: (x.id, x.name), tags))
 
 
-def convert_string_to_date(date_string: str) -> date:
-    if not date_string or date_string == 'None':
-        return
-    year, month, day = tuple(map(int, date_string.split('-')))
-    return date(year, month, day)
-
-
 class CreateTask(TaskBody):
     STATUS_ID = 'status_id'
     add_step_button = SubmitField('Add step')
@@ -104,8 +97,17 @@ class CreateTask(TaskBody):
                                 (map(lambda x: re.search(reg_exp, x), args)))))
         self.ids = list(map(int, self.ids))
 
-    def init_from_task(self, task):
-        pass
+    def init_from_task(self, task: Task):
+        self.task_name.data = task.name
+        self.description.data = task.description
+        self.executor.data = str(task.executor_id)
+        tags = list(map(lambda x: str(x.id), task.tags))
+        self.tags.data = tags
+        self.ids = list(map(lambda x: x.id, task.plan))
+        for id in self.ids:
+            step = Plan.query.filter_by(id=id).one()
+            kwargs= dict(map(lambda x: (f'{x}_{id}',step.__dict__[x]), step.__dict__))
+            self.set_step_fields(id, **kwargs)
 
     def get_names_step_fields(self, id):
         return [f'{self.STATUS_ID}_{id}', f'start_date_{id}',
@@ -128,6 +130,8 @@ class CreateTask(TaskBody):
     def convert_string_to_date(date_string: str) -> date:
         if not date_string or date_string == 'None':
             return
+        if isinstance(date_string, date):
+            return date_string
         year, month, day = tuple(map(int, date_string.split('-')))
         return date(year, month, day)
 
@@ -138,7 +142,26 @@ class CreateTask(TaskBody):
         bound_field.data = data
         setattr(self, name, bound_field)
 
-    def add_step(self, id, new=False, **kwargs):  # noqa 901
+    def set_step_fields(self, id, **kwargs):
+        names = self.get_names_step_fields(id)
+        for name in names:
+            data = kwargs.get(name, None)
+            if self.STATUS_ID in name:
+                self.set_bound_field(name=name,
+                                     field_type=SelectField,
+                                     data=str(data),
+                                     choices=self.step_choices)
+            elif 'executor_name' in name:
+                self.set_bound_field(name=name,
+                                     data=data,
+                                     field_type=StringField)
+            else:
+                self.set_bound_field(name=name,
+                                     data=self.convert_string_to_date(data),
+                                     field_type=DateField,
+                                     )
+
+    def add_step(self, id, new=False, **kwargs):
 
         def get_next_id():
             if self.STATUS_ID in kwargs:
@@ -150,23 +173,7 @@ class CreateTask(TaskBody):
         if new:
             id = get_next_id()
             self.ids.append(id)
-        names = self.get_names_step_fields(id)
-        for name in names:
-            data = kwargs.get(name, None)
-            if self.STATUS_ID in name:
-                self.set_bound_field(name=name,
-                                     field_type=SelectField,
-                                     data=data,
-                                     choices=self.step_choices)
-            elif 'executor_name' in name:
-                self.set_bound_field(name=name,
-                                     data=data,
-                                     field_type=StringField)
-            else:
-                self.set_bound_field(name=name,
-                                     data=convert_string_to_date(data),
-                                     field_type=DateField,
-                                     )
+        self.set_step_fields(id, **kwargs)
 
     def delete_step(self):
         for id in self.del_option.raw_data:
@@ -178,7 +185,7 @@ class CreateTask(TaskBody):
         self.ids = list(ids)
         self.del_option.choices = []
 
-    def check_create_task_form(self):   # noqa 901
+    def check_create_task_form(self):  # noqa 901
         success = super().validate_on_submit()
         if not success:
             return success
