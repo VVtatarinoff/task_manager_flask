@@ -35,9 +35,37 @@
             <tbody>
             {% for id in form.ids %}
             <tr>
-                <td>{{ form['status_id_'+(id|string())] }}</td>
-                <td class='text-center'>{{ form['start_date_'+(id|string())] }}</td>
-                <td class='text-center'>{{ form['planned_end_'+(id|string())] }}</td>
+                {% if form['status_id_'+(id|string())].errors %}
+                    <td>{{ form['status_id_'+(id|string())](class='text-danger') }}</td>
+                    <span class="text-danger">
+                        {% for e in form['status_id_'+(id|string())].errors %}
+                            {{ e }}
+                        {% endfor %}
+                    </span>
+                {% else %}
+                    <td>{{ form['status_id_'+(id|string())](class='text-primary') }}</td>
+                {% endif %}
+                {% if form['start_date_'+(id|string())].errors %}
+                    <td class='text-center'>{{ form['start_date_'+(id|string())](class='text-danger') }}</td>
+                    <span class="text-danger">
+                        {% for e in form['start_date_'+(id|string())].errors %}
+                            {{ e }}
+                        {% endfor %}
+                    </span>
+                {% else %}
+                    <td class='text-center'>{{ form['start_date_'+(id|string())](class='text-primary') }}</td>
+                {% endif %}
+
+                {% if form['planned_end_'+(id|string())].errors %}
+                <td class='text-center'>{{ form['planned_end_'+(id|string())](class='text-danger') }}</td>
+                <span class="text-danger">
+                    {% for e in form['planned_end_'+(id|string())].errors %}
+                        {{ e }}
+                    {% endfor %}
+                </span>
+                {% else %}
+                <td class='text-center'>{{ form['planned_end_'+(id|string())](class='text-primary') }}</td>
+                {% endif %}
                 <td class='text-center text-danger'>
                     <input type="checkbox" id="del_option" name="del_option" value={{ id }} >
 

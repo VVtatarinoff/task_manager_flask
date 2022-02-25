@@ -183,11 +183,18 @@ class EditTaskForm(TaskBody, StepTask):
         return success
 
 
+def convert_string_to_date(date_string: str) -> date:
+    if not date_string or date_string == 'None':
+        return
+    year, month, day = tuple(map(int, date_string.split('-')))
+    return date(year, month, day)
+
+
 class CreateTask(TaskBody):
     STATUS_ID = 'status_id'
     add_step_button = SubmitField('Add step')
     del_step_button = SubmitField('Delete selected')
-    del_option = SelectField('choice to delete')
+    del_option = SelectField('choice to delete', validate_choice=False)
 
     def __init__(self, task: Task = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -211,12 +218,6 @@ class CreateTask(TaskBody):
         self.ids = list(map(lambda y: y[0], filter(bool, (map(lambda x: re.search(reg_exp, x), args)))))
         self.ids = list(map(int, self.ids))
 
-    def set_bound_field(self, name='default', field_type=StringField, data=None, **kwargs):
-        field = field_type(name, **kwargs)
-        bound_field = field.bind(self, name)
-        bound_field.data = data
-        setattr(self, name, bound_field)
-
     def init_from_task(self, task):
         pass
 
@@ -233,6 +234,19 @@ class CreateTask(TaskBody):
             step_fields = self.get_names_step_fields(id)
             kwargs = dict(map(lambda x: (x, request.form[x] if (x in request.form.keys()) else None), step_fields))
             self.add_step(id, **kwargs)
+
+    @staticmethod
+    def convert_string_to_date(date_string: str) -> date:
+        if not date_string or date_string == 'None':
+            return
+        year, month, day = tuple(map(int, date_string.split('-')))
+        return date(year, month, day)
+
+    def set_bound_field(self, name='default', field_type=StringField, data=None, **kwargs):
+        field = field_type(name, **kwargs)
+        bound_field = field.bind(self, name)
+        bound_field.data = data
+        setattr(self, name, bound_field)
 
     def add_step(self, id, new=False, **kwargs):
 
@@ -256,7 +270,8 @@ class CreateTask(TaskBody):
             elif 'executor_name' in name:
                 self.set_bound_field(name=name, data=data, field_type=StringField)
             else:
-                self.set_bound_field(name=name, data=data, field_type=DateField,
+                self.set_bound_field(name=name, data=convert_string_to_date(data),
+                                     field_type=DateField,
                                      validators=[
                                          check_data_not_in_past()])
 
@@ -271,13 +286,31 @@ class CreateTask(TaskBody):
         self.del_option.choices = []
 
     def check_create_task_form(self):
-        fields = [self.tags, self.task_name, self.description, self.executor]
-        success = True
-        for field in fields:
-            success = success and field.validate(self)
-        if success and list(
-                Task.query.filter_by(name=self.task_name.data).all()):
+        # fields = [self.tags, self.task_name, self.description, self.executor]
+        # success = True
+        # for field in fields:
+        #     success = success and field.validate(self)
+        success = super().validate_on_submit()
+        if not success:
+            return success
+        if list(Task.query.filter_by(name=self.task_name.data).all()):
             self.task_name.errors = [
                 "Task with such name exists in database"]
-            success = False
+            return False
+        for id in self.ids:
+            if not self.__dict__[f'planned_end_{id}'].data:
+                self.__dict__[f'planned_end_{id}'].errors = list(
+                    *self.__dict__[f'planned_end_{id}'].errors
+                ) + ["Choose the planned deadline"]
+                return False
+            if not self.__dict__[f'start_date_{id}'].data:
+                self.__dict__[f'start_date_{id}'].errors = list(
+                    *self.__dict__[f'start_date_{id}'].errors
+                ) + ["Choose thee planned start date"]
+                return False
+            if (self.__dict__[f'planned_end_{id}'].data < self.__dict__[f'start_date_{id}'].data):
+                self.__dict__[f'start_date_{id}'].errors = list(
+                    *self.__dict__[f'start_date_{id}']  .errors
+                ) + ["Start date greater than deadline"]
+                return False
         return success
