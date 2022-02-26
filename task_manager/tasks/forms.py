@@ -59,9 +59,10 @@ class TaskBody(FlaskForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         executors = User.query.filter(User.role_id.in_([1, 2])).all()
-        self.executor.choices = [(None, '   <------>     ')] + list(
+        self.executor_choices = [(None, '   <------>     ')] + list(
             map(lambda x: (x.id, f"{x.first_name} {x.last_name}"),
                 executors))
+        self.executor.choices = self.executor_choices
         tags = Tag.query.all()
         self.tags.choices = [(None, '   <------>     ')] + list(
             map(lambda x: (x.id, x.name), tags))
@@ -144,13 +145,16 @@ class CreateTask(TaskBody):
                                      choices=self.step_choices)
             elif 'executor_id' in name:
                 self.set_bound_field(name=name,
-                                     data=data,
-                                     field_type=StringField)
+                                     data=str(data),
+                                     field_type=SelectField,
+                                     choices=self.executor_choices
+                                     )
             else:
                 self.set_bound_field(name=name,
                                      data=self.convert_string_to_date(data),
                                      field_type=DateField,
                                      )
+
 
     def add_step(self, id, new=False, **kwargs):
 
@@ -164,6 +168,7 @@ class CreateTask(TaskBody):
         if new:
             id = get_next_id()
             self.ids.append(id)
+            kwargs[f'executor_id_{id}']=self.executor.data
         self.set_step_fields(id, **kwargs)
 
     def delete_step(self):

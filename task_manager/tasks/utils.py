@@ -131,16 +131,20 @@ def change_task(task, form):
         for step in del_steps:
             db.session.delete(Plan.query.filter_by(id=step).one())
         for step in form_steps:
-            # step_attr = {
-            #     'status_id': int(form.__dict__[f'status_id_{step}'].data),
-            #     'start_date': form.__dict__[f'start_date_{step}'].data,
-            #     'planned_end': form.__dict__[f'planned_end_{step}'].data,
-            #     'task_id': task.id,
-            #     'executor_id':
-            #         form.__dict__[
-            #             f'executor_id_{step}'].data or int(
-            #             form.executor.data)}
-            pass
+            step_attr = {
+                'status_id': int(form.__dict__[f'status_id_{step}'].data),
+                'start_date': form.__dict__[f'start_date_{step}'].data,
+                'planned_end': form.__dict__[f'planned_end_{step}'].data,
+                'task_id': task.id,
+                'executor_id':
+                    form.__dict__[
+                        f'executor_id_{step}'].data or int(
+                        form.executor.data)}
+            if step in existed_steps:
+                Plan.query.filter_by(id=step).update(step_attr)
+            else:
+                plan = Plan(**step_attr)
+                db.session.add(plan)
         db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()

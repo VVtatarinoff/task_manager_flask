@@ -68,14 +68,16 @@
                     <td class='text-center'>{{ form['planned_end_'+(id|string())](class='text-primary') }}</td>
                 {% endif %}
                 {% if form['executor_id_'+(id|string())].errors %}
-                    <td class='text-center text-danger'>{{ form['executor_id_'+(id|string())](type_='hidden') }}</td>
+                    <td class='text-center text-danger'>{{ form['executor_id_'+(id|string())](type_='hidden') }}
+                    </td>
                         <span class="text-danger">
                             {% for e in form['executor_id_'+(id|string())].errors %}
                                 {{ e }}
                             {% endfor %}
                         </span>
                 {% else %}
-                    <td class='text-center text-primary'>{{ form['executor_id_'+(id|string())](type_='hidden') }}</td>
+                    <td class='text-center text-primary'>{{ form['executor_id_'+(id|string())](type_='hidden') }}
+                    </td>
                 {% endif %}
                 <td class='text-center text-danger'>
                 <input type="checkbox" id="del_option" name="del_option" value={{ id }} >
