@@ -103,7 +103,7 @@ class CreateTask(TaskBody):
     def get_names_step_fields(self, id):
         return [f'{self.STATUS_ID}_{id}', f'start_date_{id}',
                 f'actual_start_{id}', f'planned_end_{id}',
-                f'actual_end_date_{id}', f'executor_name_{id}']
+                f'actual_end_date_{id}', f'executor_id_{id}']
 
     def init_from_form(self):
         fields = request.form
@@ -142,7 +142,7 @@ class CreateTask(TaskBody):
                                      field_type=SelectField,
                                      data=str(data),
                                      choices=self.step_choices)
-            elif 'executor_name' in name:
+            elif 'executor_id' in name:
                 self.set_bound_field(name=name,
                                      data=data,
                                      field_type=StringField)

@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from operator import and_
 
 from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
@@ -98,14 +99,44 @@ def upload_task(form):
         return False
     return True
 
+def update_tags(task, form):
+    existed_tags = set(map(lambda x: x.id, task.tags))
+    form_tags = set(map(int, form.tags.raw_data))
+    del_tags = existed_tags - form_tags
+    add_tags = form_tags - existed_tags
+    for tag in (del_tags | add_tags):
+        if tag in del_tags:
+            interlink = IntermediateTaskTag.query.filter(
+                and_(IntermediateTaskTag.task_id == task.id,
+                     IntermediateTaskTag.tag_id == tag)).one()
+            db.session.delete(interlink)
+        else:
+            interlink = IntermediateTaskTag(
+                task_id=task.id,
+                tag_id=tag
+            )
+            db.session.add(interlink)
 
 def change_task(task, form):
     try:
         task.name = form.task_name.data
         task.description = form.description.data
         db.session.add(task)
+        update_tags(task, form)
+        existed_steps= set(map(lambda x: x.id, task.plan.all()))
+        form_steps = set(map(int, form.ids))
+        del_steps = existed_steps - form_steps
+        for step in del_steps:
+            db.session.delete(Plan.query.filter_by(id=step).one())
+        for step in form_steps:
+            step_attr = {'status_id': int(form.__dict__[f'status_id_{step}'].data),
+                         'start_date': form.__dict__[f'start_date_{step}'].data,
+                         'planned_end': form.__dict__[f'planned_end_{step}'].data,
+                         'task_id': task.id,
+                         'executor_id': form.__dict__[f'executor_id_{step}'].data or int(form.executor.data)}
+            pass
         db.session.commit()
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         db.session.rollback()
         return False
     return True
