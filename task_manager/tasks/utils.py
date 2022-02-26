@@ -99,6 +99,7 @@ def upload_task(form):
         return False
     return True
 
+
 def update_tags(task, form):
     existed_tags = set(map(lambda x: x.id, task.tags))
     form_tags = set(map(int, form.tags.raw_data))
@@ -117,26 +118,31 @@ def update_tags(task, form):
             )
             db.session.add(interlink)
 
+
 def change_task(task, form):
     try:
         task.name = form.task_name.data
         task.description = form.description.data
         db.session.add(task)
         update_tags(task, form)
-        existed_steps= set(map(lambda x: x.id, task.plan.all()))
+        existed_steps = set(map(lambda x: x.id, task.plan.all()))
         form_steps = set(map(int, form.ids))
         del_steps = existed_steps - form_steps
         for step in del_steps:
             db.session.delete(Plan.query.filter_by(id=step).one())
         for step in form_steps:
-            step_attr = {'status_id': int(form.__dict__[f'status_id_{step}'].data),
-                         'start_date': form.__dict__[f'start_date_{step}'].data,
-                         'planned_end': form.__dict__[f'planned_end_{step}'].data,
-                         'task_id': task.id,
-                         'executor_id': form.__dict__[f'executor_id_{step}'].data or int(form.executor.data)}
+            # step_attr = {
+            #     'status_id': int(form.__dict__[f'status_id_{step}'].data),
+            #     'start_date': form.__dict__[f'start_date_{step}'].data,
+            #     'planned_end': form.__dict__[f'planned_end_{step}'].data,
+            #     'task_id': task.id,
+            #     'executor_id':
+            #         form.__dict__[
+            #             f'executor_id_{step}'].data or int(
+            #             form.executor.data)}
             pass
         db.session.commit()
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         db.session.rollback()
         return False
     return True

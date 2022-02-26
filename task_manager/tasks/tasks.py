@@ -93,7 +93,7 @@ def update_task(id):    # noqa 901
     context = dict()
     context['form'] = form
     context['title'] = TITLES['update']
-    return render_template('tasks/task_creation.html', **context)
+    return render_template('tasks/task_update.html', **context)
 
 
 @tasks_bp.route('/task_delete/<int:id>', methods=['GET', 'POST'])
