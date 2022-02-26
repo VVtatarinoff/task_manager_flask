@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from task_manager import db
 from task_manager.statuses.models import Status
-from task_manager.tasks.forms import CreateTask
+from task_manager.tasks.forms import CreateTask, UpdateTask
 from task_manager.tasks.models import Plan, IntermediateTaskTag, Task
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ def create_tasks_list(tasks):
         task_view['planned_start'] = task.start_date
         task_view['planned_end'] = task.planned_end_date
         task_view['actual_start_date'] = task.actual_start_date
+        task_view['actual_end_date'] = task.actual_end_date
         task_view['on_review'] = task.post_to_review
         task_view['started'] = True
         task_view['finished'] = False
@@ -65,7 +66,7 @@ def get_plan_from_form(form: CreateTask):
     return steps
 
 
-def upload_task(form):
+def upload_task(form: CreateTask):
     manager_id = current_user.id
     executor_id = form.executor.data
     task_name = form.task_name.data
@@ -100,7 +101,7 @@ def upload_task(form):
     return True
 
 
-def update_tags(task, form):
+def update_tags(task: Task, form):
     existed_tags = set(map(lambda x: x.id, task.tags))
     form_tags = set(map(int, form.tags.raw_data))
     del_tags = existed_tags - form_tags
@@ -119,7 +120,7 @@ def update_tags(task, form):
             db.session.add(interlink)
 
 
-def change_task(task, form):
+def change_task(task, form: UpdateTask):
     try:
         task.name = form.task_name.data
         task.description = form.description.data
