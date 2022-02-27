@@ -55,7 +55,6 @@ class TaskBody(FlaskForm):
         check_selected("Nominate an executor")])
     tags = SelectMultipleField('Tags ', validate_choice=False)
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         executors = User.query.filter(User.role_id.in_([1, 2])).all()
@@ -157,7 +156,6 @@ class CreateTask(TaskBody):
                                      field_type=DateField,
                                      )
 
-
     def add_step(self, id, new=False, **kwargs):
 
         def get_next_id():
@@ -170,7 +168,7 @@ class CreateTask(TaskBody):
         if new:
             id = get_next_id()
             self.ids.append(id)
-            kwargs[f'executor_id_{id}']=self.executor.data
+            kwargs[f'executor_id_{id}'] = self.executor.data
         self.set_step_fields(id, **kwargs)
 
     def delete_step(self):

@@ -148,14 +148,10 @@ def create_task():
 @tasks_bp.route('/task_step_start/<int:id>', methods=['GET'])
 @login_required
 def start_step(id):
+    step = Plan.query.filter_by(id=id).first_or_404()
     try:
-        step = Plan.query.filter_by(id=id).one()
-    except SQLAlchemyError:
-        flash('No such step exists in database', 'warning')
-        return redirect(url_for('main.index'))
-    try:
-        step.actual_start = dateutil.utils.today()
-        db.session.add(step)
+        Plan.query.filter_by(id=id).update(
+            {'actual_start': dateutil.utils.today()})
         db.session.commit()
         flash('Step started', 'success')
     except SQLAlchemyError:
@@ -167,14 +163,10 @@ def start_step(id):
 @tasks_bp.route('/task_step_end/<int:id>', methods=['GET'])
 @login_required
 def end_step(id):
+    step = Plan.query.filter_by(id=id).first_or_404()
     try:
-        step = Plan.query.filter_by(id=id).one()
-    except SQLAlchemyError:
-        flash('No such step exists in database', 'warning')
-        return redirect(url_for('main.index'))
-    try:
-        step.actual_end_date = dateutil.utils.today()
-        db.session.add(step)
+        Plan.query.filter_by(id=id).update(
+            {'actual_end_date': dateutil.utils.today()})
         db.session.commit()
         flash('Step ended', 'success')
     except SQLAlchemyError:
