@@ -14,15 +14,15 @@ from task_manager.tags.models import Tag
 from task_manager.tasks.models import Task, Plan
 
 
-def check_data_not_in_past():
-    msg = 'The date could not be in the past'
-
-    def _gt_today(form, field):
-        today = date.today()
-        if field.data and field.data < today:
-            raise ValidationError(msg)
-
-    return _gt_today
+# def check_data_not_in_past():
+#     msg = 'The date could not be in the past'
+#
+#     def _gt_today(form, field):
+#         today = date.today()
+#         if field.data and field.data < today:
+#             raise ValidationError(msg)
+#
+#     return _gt_today
 
 
 def check_selected(msg):
@@ -33,12 +33,12 @@ def check_selected(msg):
     return _not_none
 
 
-def check_not_empty(msg=''):
-    def _is_empty(_, field):
-        if not field.data:
-            raise ValidationError(msg)
-
-    return _is_empty
+# def check_not_empty(msg=''):
+#     def _is_empty(_, field):
+#         if not field.data:
+#             raise ValidationError(msg)
+#
+#     return _is_empty
 
 
 class TaskBody(FlaskForm):
@@ -54,7 +54,7 @@ class TaskBody(FlaskForm):
     executor = SelectField('Executor ', validators=[
         check_selected("Nominate an executor")])
     tags = SelectMultipleField('Tags ', validate_choice=False)
-    submit = SubmitField('Create')
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -69,6 +69,7 @@ class TaskBody(FlaskForm):
 
 
 class CreateTask(TaskBody):
+    submit = SubmitField('Create')
     STATUS_ID = 'status_id'
     add_step_button = SubmitField('Add step')
     del_step_button = SubmitField('Delete selected')

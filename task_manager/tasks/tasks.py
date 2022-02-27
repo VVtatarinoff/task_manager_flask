@@ -1,5 +1,6 @@
 import logging
 
+import dateutil.utils
 from flask import (Blueprint, redirect, url_for, request,
                    flash, render_template)
 from flask_login import login_required
@@ -7,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager import db
 from task_manager.tasks.forms import CreateTask, UpdateTask
-from task_manager.tasks.models import Task
+from task_manager.tasks.models import Task, Plan
 from task_manager.auths.models import Permission
 from task_manager.auths.users import permission_required
 from task_manager.tasks.utils import (create_tasks_list,
@@ -63,7 +64,7 @@ def show_task_detail(id):
 @tasks_bp.route('/task_update/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
-def update_task(id):    # noqa 901
+def update_task(id):  # noqa 901
     task = Task.query.filter_by(id=id).one()
     if msg := get_error_modifing_task(task):
         flash(msg, 'warning')
@@ -142,3 +143,41 @@ def create_task():
     context['form'] = form
     context['title'] = TITLES['create']
     return render_template('tasks/task_creation.html', **context)
+
+
+@tasks_bp.route('/task_step_start/<int:id>', methods=['GET'])
+@login_required
+def start_step(id):
+    try:
+        step = Plan.query.filter_by(id=id).one()
+    except SQLAlchemyError:
+        flash('No such step exists in database', 'warning')
+        return redirect(url_for('main.index'))
+    try:
+        step.actual_start = dateutil.utils.today()
+        db.session.add(step)
+        db.session.commit()
+        flash('Step started', 'success')
+    except SQLAlchemyError:
+        flash('Error changing the database', 'error')
+        db.session.rollback()
+    return redirect(url_for('tasks.show_task_detail', id=step.task_id))
+
+
+@tasks_bp.route('/task_step_end/<int:id>', methods=['GET'])
+@login_required
+def end_step(id):
+    try:
+        step = Plan.query.filter_by(id=id).one()
+    except SQLAlchemyError:
+        flash('No such step exists in database', 'warning')
+        return redirect(url_for('main.index'))
+    try:
+        step.actual_end_date = dateutil.utils.today()
+        db.session.add(step)
+        db.session.commit()
+        flash('Step ended', 'success')
+    except SQLAlchemyError:
+        flash('Error changing the database', 'error')
+        db.session.rollback()
+    return redirect(url_for('tasks.show_task_detail', id=step.task_id))
