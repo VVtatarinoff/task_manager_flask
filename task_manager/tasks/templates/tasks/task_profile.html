@@ -133,6 +133,18 @@
             Delete task
         </button>
     </div>
+
+{% endif %}
+
+{% if steps_ended and current_user == task.executor_user %}
+    <div class="col-2">
+        <a class="btn btn-success mb-3" href={{ url_for('tasks.send_to_confirm', id=task.id) }}>Send for confirmation</a>
+    </div>
+{% endif %}
+{% if task.post_to_review and current_user == task.manager_user %}
+    <div class="col-2">
+        <a class="btn btn-success mb-3" href={{ url_for('tasks.confirm_task_end', id=task.id) }}>Confirm closing task</a>
+    </div>
 {% endif %}
 </div>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

@@ -3,7 +3,7 @@ import logging
 import dateutil.utils
 from flask import (Blueprint, redirect, url_for, request,
                    flash, render_template)
-from flask_login import login_required
+from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from task_manager import db
@@ -57,6 +57,10 @@ def show_task_detail(id):
         return redirect(url_for('main.index'))
     context = dict()
     context['task'] = task
+    steps_ended=False
+    if not (task.actual_end_date or task.post_to_review):
+        steps_ended = all(map(lambda x: x.actual_end_date, task.plan))
+    context['steps_ended'] = steps_ended
     context['title'] = TITLES['detail']
     return render_template('tasks/task_profile.html', **context)
 
@@ -173,3 +177,50 @@ def end_step(id):
         flash('Error changing the database', 'error')
         db.session.rollback()
     return redirect(url_for('tasks.show_task_detail', id=step.task_id))
+
+
+@tasks_bp.route('/ask_confirmation/<int:id>', methods=['GET'])
+@login_required
+def send_to_confirm(id):
+    task = Task.query.filter_by(id=id).first_or_404()
+    if not task.executor_id == current_user.id:
+        flash('Only executor of the task could ask confirmation to end it')
+        redirect(url_for('tasks.show_task_detail', id=id))
+    if not all(map(lambda x: x.actual_end_date, task.plan)):
+        flash('Not all steps of task are ended to close the task')
+        redirect(url_for('tasks.show_task_detail', id=id))
+    if task.actual_end_date:
+        flash('The task was already closed')
+        redirect(url_for('tasks.show_task_detail', id=id))
+    try:
+        task.post_to_review = True
+        db.session.commit()
+        flash(f'task was sent for review to manager {task.manager_user.name}', 'success')
+    except SQLAlchemyError:
+        flash('error updating db', 'danger')
+    return redirect(url_for('tasks.show_task_detail', id=id))
+
+
+@tasks_bp.route('/confirm_end/<int:id>', methods=['GET'])
+@login_required
+def confirm_task_end(id):
+    task = Task.query.filter_by(id=id).first_or_404()
+    if not task.manager_id == current_user.id:
+        flash('Only manager of the task could close it')
+        redirect(url_for('tasks.show_task_detail', id=id))
+    if not task.post_to_review:
+        flash('The task should be sent by manager for confirmation')
+        redirect(url_for('tasks.show_task_detail', id=id))
+    if not all(map(lambda x: x.actual_end_date, task.plan)):
+        flash('Not all steps of task are ended to close the task')
+        redirect(url_for('tasks.show_task_detail', id=id))
+    end_date = max(map(lambda x: x.actual_end_date, task.plan))
+    if end_date:
+        try:
+            task.post_to_review = False
+            task.actual_end_date = end_date
+            db.session.commit()
+            flash(f'task was closed by {task.manager_user.name}', 'success')
+        except SQLAlchemyError:
+            flash('error updating db', 'danger')
+    return redirect(url_for('tasks.show_task_detail', id=id))
