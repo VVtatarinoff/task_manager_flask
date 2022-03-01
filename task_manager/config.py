@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import psycopg2     # noqa 401
 
 from dotenv import load_dotenv
 
