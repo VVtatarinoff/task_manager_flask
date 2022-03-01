@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import psycopg2     # noqa 401
 
 from dotenv import load_dotenv
 
@@ -43,9 +42,9 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL') or ('sqlite:///' + os.path.join(current_dir,
                                                         'data.sqlite'))
-    if SQLALCHEMY_DATABASE_URI.startswith('postgres'):
+    if SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
         SQLALCHEMY_DATABASE_URI = (
-            'postgres+psycopg2' + SQLALCHEMY_DATABASE_URI[8:])
+            'postgresql' + SQLALCHEMY_DATABASE_URI[8:])
 
 
 config = {
