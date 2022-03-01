@@ -3,7 +3,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-
 current_dir = os.path.abspath(os.path.dirname(__file__))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -43,6 +42,9 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL') or ('sqlite:///' + os.path.join(current_dir,
                                                         'data.sqlite'))
+    if SQLALCHEMY_DATABASE_URI.startswith('postgres'):
+        SQLALCHEMY_DATABASE_URI = (
+            'postgres+psycopg2' + SQLALCHEMY_DATABASE_URI[8:])
 
 
 config = {
