@@ -57,7 +57,7 @@ def show_task_detail(id):
         return redirect(url_for('main.index'))
     context = dict()
     context['task'] = task
-    steps_ended=False
+    steps_ended = False
     if not (task.actual_end_date or task.post_to_review):
         steps_ended = all(map(lambda x: x.actual_end_date, task.plan))
     context['steps_ended'] = steps_ended
@@ -195,7 +195,8 @@ def send_to_confirm(id):
     try:
         task.post_to_review = True
         db.session.commit()
-        flash(f'task was sent for review to manager {task.manager_user.name}', 'success')
+        flash(f'task was sent for review to manager {task.manager_user.name}',
+              'success')
     except SQLAlchemyError:
         flash('error updating db', 'danger')
     return redirect(url_for('tasks.show_task_detail', id=id))
@@ -203,7 +204,7 @@ def send_to_confirm(id):
 
 @tasks_bp.route('/confirm_end/<int:id>', methods=['GET'])
 @login_required
-def confirm_task_end(id):
+def confirm_task_end(id):       # noqa 901
     task = Task.query.filter_by(id=id).first_or_404()
     if not task.manager_id == current_user.id:
         flash('Only manager of the task could close it')
