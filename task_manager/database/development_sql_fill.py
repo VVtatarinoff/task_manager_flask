@@ -29,12 +29,12 @@ SQL_CLEAR = ["DELETE FROM intermediate_task_tags",
              "DELETE FROM users",
              ]
 SQL_ROLES = [
-    "INSERT INTO roles (name, default_flag, permissions) "
-    "VALUES ('Executor','True','3')",
-    "INSERT INTO roles (name, default_flag, permissions) "
-    "VALUES ('Manager','False','7')",
-    "INSERT INTO roles (name, default_flag, permissions) "
-    "VALUES ('Administrator','False','255')", ]
+    "INSERT INTO roles (id, name, default_flag, permissions) "
+    "VALUES (1, 'Executor','True','3')",
+    "INSERT INTO roles (id, name, default_flag, permissions) "
+    "VALUES (2, 'Manager','False','7')",
+    "INSERT INTO roles (id, name, default_flag, permissions) "
+    "VALUES (3, 'Administrator','False','255')", ]
 SQL_USERS = [
     "INSERT INTO users (id, email, name, first_name, last_name, "
     "password_hash, role_id, creation_date)"
