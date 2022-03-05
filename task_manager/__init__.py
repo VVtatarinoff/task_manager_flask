@@ -20,14 +20,17 @@ bootstrap = Bootstrap()
 migrate = Migrate()
 
 
-def init_logger():
+def init_logger(config_name):
     logger = logging.getLogger('task_manager')
     logger.setLevel(logging.DEBUG)
-    sm = logging.StreamHandler(stream=sys.stderr)
+    if config[config_name].LOG_TO_STDOUT:
+        sm = logging.StreamHandler(stream=sys.stdout)
+    else:
+        sm = logging.StreamHandler(stream=sys.stderr)
     formatter = logging.Formatter('%(asctime)s :: %(name)s :'
                                   ': %(levelname)s :: %(message)s')
     sm.setFormatter(formatter)
-    sm.setLevel('CRITICAL')
+    sm.setLevel('DEBUG')
     logger.addHandler(sm)
     logger_file = BASE_DIR / "logs/task_manager.log"
     if logger_file.is_file():
@@ -63,7 +66,7 @@ def create_app(config_name):
     app.register_blueprint(status_bp)
     app.register_blueprint(tags_bp)
     app.register_blueprint(tasks_bp)
-    init_logger()
+    init_logger(config_name)
     return app
 
 

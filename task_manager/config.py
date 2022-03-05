@@ -25,6 +25,8 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     ENV = 'development'
+    LOG_TO_STDOUT = os.getenv(
+        'LOG_TO_STDOUT')
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DEV_DATABASE_URL')
 
@@ -32,6 +34,8 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     ENV = 'development'
+    LOG_TO_STDOUT = os.getenv(
+        'LOG_TO_STDOUT')
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'TEST_DATABASE_URL') or "sqlite://"
@@ -39,6 +43,8 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     ENV = 'production'
+    LOG_TO_STDOUT = os.getenv(
+        'LOG_TO_STDOUT')
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL') or ('sqlite:///' + os.path.join(current_dir,
                                                         'data.sqlite'))
