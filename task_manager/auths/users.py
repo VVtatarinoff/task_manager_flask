@@ -74,9 +74,9 @@ def register():
                         )
             db.session.add(user)
             db.session.commit()
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
             db.session.rollback()
-            flash('Error during adding to DataBase', 'danger')
+            flash(f'Error during adding to DataBase {e}', 'danger')
         else:
             logger.debug(f'user registered {request.form["email"]}')
             flash('User registered', 'success')
