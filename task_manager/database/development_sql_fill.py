@@ -37,7 +37,7 @@ SQL_ROLES = [
     "VALUES ('Administrator','False','255')", ]
 SQL_USERS = [
     "INSERT INTO users (id, email, name, first_name, last_name, "
-    "password_hash, role_id, 'creation_date')"
+    "password_hash, role_id, creation_date)"
     f"VALUES (1, '{EXECUTOR['email']}', '{EXECUTOR['name']}', "
     f"'{EXECUTOR['first_name']}', '{EXECUTOR['last_name']}', "
     f"'{generate_password_hash(EXECUTOR['password'])}',1,"
