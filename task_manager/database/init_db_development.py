@@ -14,9 +14,9 @@ app = create_app('development')
 
 if __name__ == '__main__':
     with app.app_context():
-        migrate = Migrate(app, db)  # noqa 481
+        # migrate = Migrate(app, db)  # noqa 481
         directory = BASE_DIR / 'migrations'
-        upgrade(directory=directory)
+        # upgrade(directory=directory)
         with db.engine.connect() as con:
             for sql in SQLS:
                 con.execute(sql)
