@@ -25,8 +25,8 @@ SQL_CLEAR = ["DELETE FROM intermediate_task_tags",
              "DELETE FROM tasks",
              "DELETE FROM tags",
              "DELETE FROM statuses",
-             "DELETE FROM roles",
              "DELETE FROM users",
+             "DELETE FROM roles"
              ]
 SQL_ROLES = [
     "INSERT INTO roles (id, name, default_flag, permissions) "
