@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 import logging
+import os
 from pathlib import Path
 
 from flask_migrate import upgrade, Migrate  # noqa 401
 
-from task_manager import create_app
+from task_manager import create_app, db
 from task_manager.database.development_sql_fill import SQLS
 
 CURRENT_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURRENT_DIR.parent
 
-app = create_app('development')
-
-from task_manager import db # noqa 402
+app = create_app(os.getenv('FLASK_CONFIG'))
 
 logger = logging.getLogger(__name__)
 
